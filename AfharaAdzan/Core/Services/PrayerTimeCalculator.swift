@@ -87,7 +87,7 @@ struct PrayerTimeCalculator {
     private static func makeDate(_ hours: Double, from base: Date) -> Date? {
         let cal = Calendar.current
         var c   = cal.dateComponents([.year, .month, .day], from: base)
-        let total   = Int(hours * 60)
+        let total   = Int((hours * 60).rounded())
         c.hour      = (total / 60) % 24
         c.minute    = total % 60
         c.second    = 0
