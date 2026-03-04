@@ -39,7 +39,7 @@ struct MainWindowView: View {
             HStack(spacing: 10) {
                 Image(systemName: "moon.stars.fill")
                     .font(.title2)
-                    .foregroundStyle(.accent(for: colorScheme))
+                    .foregroundStyle(Color.accent(for: colorScheme))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Afhara Adzan")
                         .font(.headline)
@@ -128,7 +128,7 @@ private struct ScheduleDetailView: View {
                         Text("\(appState.nextPrayerName)  \(appState.countdownString)")
                             .font(.subheadline)
                             .fontWeight(.semibold)
-                            .foregroundStyle(.accent(for: colorScheme))
+                            .foregroundStyle(Color.accent(for: colorScheme))
                             .monospacedDigit()
                     }
                 }
@@ -173,7 +173,7 @@ private struct DesktopPrayerRow: View {
                         Text("Sudah lewat")
                     } else if prayer.isNext {
                         Text("Waktu berikutnya")
-                            .foregroundStyle(.accent(for: colorScheme))
+                            .foregroundStyle(Color.accent(for: colorScheme))
                     }
                 }
                 .font(.caption)

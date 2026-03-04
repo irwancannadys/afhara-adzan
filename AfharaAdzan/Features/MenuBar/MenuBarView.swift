@@ -40,7 +40,7 @@ struct MenuBarView: View {
                     Text(appState.countdownString)
                         .font(.system(.callout, design: .monospaced))
                         .fontWeight(.semibold)
-                        .foregroundStyle(.accent(for: colorScheme))
+                        .foregroundStyle(Color.accent(for: colorScheme))
                 }
             }
         }
