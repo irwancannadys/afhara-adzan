@@ -25,7 +25,7 @@ final class NotificationService {
         let center = UNUserNotificationCenter.current()
         center.removeAllPendingNotificationRequests()
 
-        for prayer in prayerTimes where prayer.name.isFardhu && !prayer.isPast {
+        for prayer in prayerTimes where prayer.name.isFardhu && !prayer.isPast && !settings.mutedPrayers.contains(prayer.name) {
             let content      = UNMutableNotificationContent()
             content.title    = "Waktu \(prayer.name.rawValue)"
             content.body     = "Saatnya \(prayer.name.rawValue) \u{2014} \(prayer.timeString)"
