@@ -60,6 +60,7 @@ struct MainWindowView: View {
                     .tag(item)
             }
             .listStyle(.sidebar)
+            .padding(.top, 8)
 
             Spacer(minLength: 0)
 
@@ -182,11 +183,10 @@ private struct DesktopPrayerRow: View {
                 .fontWeight(.medium)
                 .foregroundStyle(rowColor)
 
-            if prayer.isNext {
-                Circle()
-                    .fill(.orange)
-                    .frame(width: 8, height: 8)
-            }
+            Circle()
+                .fill(.orange)
+                .frame(width: 8, height: 8)
+                .opacity(prayer.isNext ? 1 : 0)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)

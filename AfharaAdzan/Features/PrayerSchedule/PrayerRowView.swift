@@ -20,11 +20,10 @@ struct PrayerRowView: View {
                 .font(.system(.body, design: .monospaced))
                 .foregroundStyle(rowColor)
 
-            if prayer.isNext {
-                Circle()
-                    .fill(.orange)
-                    .frame(width: 6, height: 6)
-            }
+            Circle()
+                .fill(.orange)
+                .frame(width: 6, height: 6)
+                .opacity(prayer.isNext ? 1 : 0)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 9)
