@@ -104,24 +104,56 @@ private struct ScheduleDetailView: View {
         appState.prayerTimes.filter { $0.name.isFardhu }
     }
 
+    private var islamicDateString: String {
+        let cal   = Calendar(identifier: .islamicUmmAlQura)
+        let comp  = cal.dateComponents([.year, .month, .day], from: Date())
+        guard let day = comp.day, let month = comp.month, let year = comp.year else { return "" }
+        let months = ["Muharram","Safar","Rabi'ul Awal","Rabi'ul Akhir",
+                      "Jumadil Awal","Jumadil Akhir","Rajab","Sya'ban",
+                      "Ramadan","Syawal","Dzulqa'dah","Dzulhijjah"]
+        return "\(day) \(months[month - 1]) \(year) H"
+    }
+
     var body: some View {
         VStack(spacing: 0) {
 
-            // Header tanggal & countdown
+            // Date banner: Hijriah (kiri) + Masehi (kanan)
             HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide).year()))
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                    Text(appState.location.cityName)
-                        .font(.subheadline)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Tanggal Hijriah")
+                        .font(.caption)
                         .foregroundStyle(.secondary)
+                    Text(islamicDateString)
+                        .font(.title3)
+                        .fontWeight(.semibold)
                 }
 
                 Spacer()
 
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("Tanggal Masehi")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide).year()))
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
+
+            Divider()
+
+            // Sub-header: kota + countdown
+            HStack(alignment: .center) {
+                Text(appState.location.cityName)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
                 if !appState.nextPrayerName.isEmpty {
-                    VStack(alignment: .trailing, spacing: 4) {
+                    VStack(alignment: .trailing, spacing: 2) {
                         Text("Berikutnya")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -134,7 +166,7 @@ private struct ScheduleDetailView: View {
                 }
             }
             .padding(.horizontal, 24)
-            .padding(.vertical, 20)
+            .padding(.vertical, 12)
 
             Divider()
 
@@ -194,7 +226,7 @@ private struct DesktopPrayerRow: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
-        .background(prayer.isNext ? accentColor.opacity(0.07) : Color.clear)
+        .background(prayer.isNext ? Color.accentBackground(for: colorScheme) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .opacity(prayer.isPast ? 0.65 : 1.0)
     }

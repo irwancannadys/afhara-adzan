@@ -10,11 +10,14 @@ struct MenuBarView: View {
         VStack(spacing: 0) {
             headerView
             Divider()
+            dateBannerView
+            Divider()
             PrayerScheduleView()
             Divider()
             footerView
         }
         .frame(width: 300)
+        .background(Color(NSColor.windowBackgroundColor))
     }
 
     // MARK: - Header
@@ -46,6 +49,44 @@ struct MenuBarView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
+    }
+
+    // MARK: - Date Banner
+
+    private var dateBannerView: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Hijriah")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text(islamicDateString)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 1) {
+                Text("Masehi")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).year()))
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+
+    private var islamicDateString: String {
+        let cal  = Calendar(identifier: .islamicUmmAlQura)
+        let comp = cal.dateComponents([.year, .month, .day], from: Date())
+        guard let day = comp.day, let month = comp.month, let year = comp.year else { return "" }
+        let months = ["Muharram","Safar","Rabi'ul Awal","Rabi'ul Akhir",
+                      "Jumadil Awal","Jumadil Akhir","Rajab","Sya'ban",
+                      "Ramadan","Syawal","Dzulqa'dah","Dzulhijjah"]
+        return "\(day) \(months[month - 1]) \(year) H"
     }
 
     // MARK: - Footer

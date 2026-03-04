@@ -11,6 +11,14 @@ A minimal macOS menu bar app for Islamic prayer time reminders. Lives quietly in
 
 ## Screenshots
 
+### Light Mode
+
+| Menu Bar | Desktop |
+|----------|---------|
+| ![Menu Bar Light](docs/screenshots/menubar-light.png) | ![Desktop Light](docs/screenshots/desktop-light.png) |
+
+### Dark Mode
+
 | Menu Bar | Desktop |
 |----------|---------|
 | ![Menu Bar](docs/screenshots/menubar.png) | ![Desktop](docs/screenshots/desktop.png) |
@@ -25,6 +33,9 @@ A minimal macOS menu bar app for Islamic prayer time reminders. Lives quietly in
 - **Banner notifications** — macOS notification at each prayer time
 - **Auto location** — detects your city via GPS, or set manually
 - **Kemenag RI method** — Fajr 20°, Isha 18°, Shafi'i madhab
+- **Theme switcher** — Light, Dark, or follow System preference (via Pengaturan)
+- **Dual date display** — shows Hijriah (Islamic) and Gregorian date in both the popup and desktop view
+- **Timezone label** — prayer times shown with WIB / WITA / WIT label based on your location
 
 ---
 
