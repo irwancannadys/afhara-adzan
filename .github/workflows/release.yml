@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          xcodebuild \
+            -project AfharaAdzan/AfharaAdzan.xcodeproj \
+            -scheme AfharaAdzan \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Create DMG
+        run: |
+          mkdir -p dmg_contents
+          cp -r build/Build/Products/Release/AfharaAdzan.app dmg_contents/
+          ln -s /Applications dmg_contents/Applications
+
+          hdiutil create \
+            -volname "AfharaAdzan" \
+            -srcfolder dmg_contents \
+            -ov -format UDZO \
+            "AfharaAdzan-${{ github.ref_name }}.dmg"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: AfharaAdzan-${{ github.ref_name }}.dmg
+          body: |
+            ## Cara Install
+
+            1. Download `AfharaAdzan-${{ github.ref_name }}.dmg`
+            2. Buka file DMG
+            3. Drag **AfharaAdzan** ke folder **Applications**
+            4. **Pertama kali buka:** klik kanan → **Open** (bukan double-click biasa)
+               > macOS akan blokir kalau langsung double-click karena app belum ternotarisasi.
+               > Setelah sekali di-allow, selanjutnya normal.
+
+            ### Alternatif lewat Terminal
+            ```sh
+            xattr -cr /Applications/AfharaAdzan.app
+            ```
