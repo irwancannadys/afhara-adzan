@@ -1,6 +1,7 @@
 import Foundation
 import CoreLocation
 import Observation
+import ServiceManagement
 
 @Observable
 @MainActor
@@ -56,15 +57,18 @@ final class AppState {
 
         guard settings.isSoundEnabled else { return }
 
-        let upcoming = prayerTimes.filter { $0.name.isFardhu && !$0.isPast }
+        let upcoming = prayerTimes.filter {
+            $0.name.isFardhu && !$0.isPast && !settings.mutedPrayers.contains($0.name)
+        }
         for prayer in upcoming {
-            let delay = prayer.time.timeIntervalSinceNow
+            let delay     = prayer.time.timeIntervalSinceNow
+            let soundName = settings.selectedSound
             guard delay > 0 else { continue }
 
             let timer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
                 Task { @MainActor [weak self] in
                     guard let self, self.settings.isSoundEnabled else { return }
-                    AudioService.shared.playAdzan()
+                    AudioService.shared.playAdzan(soundName: soundName)
                 }
             }
             audioTimers.append(timer)
@@ -156,7 +160,20 @@ final class AppState {
            let data = try? JSONEncoder().encode(location) {
             UserDefaults.standard.set(data, forKey: "manual_location")
         }
+        applyLaunchAtLogin(settings.launchAtLogin)
         refreshPrayerTimes()
+    }
+
+    private func applyLaunchAtLogin(_ enable: Bool) {
+        do {
+            if enable {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
+        } catch {
+            // Gagal register/unregister — tidak fatal, toggle akan di-sync ulang saat load
+        }
     }
 
     private func loadFromStorage() {
@@ -169,5 +186,7 @@ final class AppState {
            let decoded = try? JSONDecoder().decode(LocationModel.self, from: data) {
             location = decoded
         }
+        // Sync toggle dengan status aktual SMAppService
+        settings.launchAtLogin = SMAppService.mainApp.status == .enabled
     }
 }

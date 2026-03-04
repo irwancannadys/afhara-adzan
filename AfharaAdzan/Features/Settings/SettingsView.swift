@@ -6,6 +6,16 @@ struct SettingsView: View {
     @State private var settings: PrayerSettings = PrayerSettings()
     @State private var manualCity: String = ""
 
+    private var availableSounds: [String] {
+        Bundle.main.paths(forResourcesOfType: "mp3", inDirectory: nil)
+            .map { URL(fileURLWithPath: $0).deletingPathExtension().lastPathComponent }
+            .sorted()
+    }
+
+    private var fardhuPrayerNames: [PrayerName] {
+        PrayerName.allCases.filter { $0.isFardhu }
+    }
+
     var body: some View {
         Form {
 
@@ -22,7 +32,6 @@ struct SettingsView: View {
             // MARK: Notifikasi
             Section("Notifikasi") {
                 Toggle("Banner Notifikasi", isOn: $settings.isNotificationEnabled)
-                Toggle("Suara Adzan", isOn: $settings.isSoundEnabled)
                 Toggle("Countdown di Status Bar", isOn: $settings.isCountdownEnabled)
 
                 Stepper(
@@ -31,9 +40,56 @@ struct SettingsView: View {
                     in: 0...30,
                     step: 5
                 )
+                .disabled(!settings.isNotificationEnabled)
 
                 Button("Stop Semua Notifikasi", role: .destructive) {
                     appState.stopAll()
+                }
+            }
+
+            // MARK: Notifikasi per Sholat
+            Section("Notifikasi per Waktu Sholat") {
+                ForEach(fardhuPrayerNames) { prayer in
+                    Toggle(prayer.rawValue, isOn: Binding(
+                        get: { !settings.mutedPrayers.contains(prayer) },
+                        set: { enabled in
+                            if enabled { settings.mutedPrayers.remove(prayer) }
+                            else       { settings.mutedPrayers.insert(prayer) }
+                        }
+                    ))
+                }
+            }
+            .disabled(!settings.isNotificationEnabled)
+
+            // MARK: Suara Adzan
+            Section("Suara Adzan") {
+                Toggle("Aktifkan Suara", isOn: $settings.isSoundEnabled)
+
+                if !availableSounds.isEmpty {
+                    Picker("Pilih Suara", selection: $settings.selectedSound) {
+                        ForEach(availableSounds, id: \.self) { sound in
+                            Text(sound.replacingOccurrences(of: "_", with: " ").capitalized)
+                                .tag(sound)
+                        }
+                    }
+                    .disabled(!settings.isSoundEnabled)
+
+                    HStack {
+                        if AudioService.shared.isPlaying {
+                            Button(role: .destructive) {
+                                AudioService.shared.stopAdzan()
+                            } label: {
+                                Label("Stop", systemImage: "stop.fill")
+                            }
+                        } else {
+                            Button {
+                                AudioService.shared.playAdzan(soundName: settings.selectedSound)
+                            } label: {
+                                Label("Preview", systemImage: "play.fill")
+                            }
+                        }
+                    }
+                    .disabled(!settings.isSoundEnabled)
                 }
             }
 
@@ -56,6 +112,11 @@ struct SettingsView: View {
 
                 LabeledContent("Lokasi saat ini", value: appState.location.cityName)
                     .foregroundStyle(.secondary)
+            }
+
+            // MARK: Sistem
+            Section("Sistem") {
+                Toggle("Buka saat Login", isOn: $settings.launchAtLogin)
             }
 
             // MARK: Metode Hisab

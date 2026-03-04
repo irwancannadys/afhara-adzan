@@ -3,6 +3,7 @@ import SwiftUI
 enum MainNavItem: String, CaseIterable, Identifiable {
     case schedule = "Jadwal Sholat"
     case settings = "Pengaturan"
+    case about    = "Tentang"
 
     var id: String { rawValue }
 
@@ -10,6 +11,7 @@ enum MainNavItem: String, CaseIterable, Identifiable {
         switch self {
         case .schedule: "clock.fill"
         case .settings: "gearshape.fill"
+        case .about:    "info.circle.fill"
         }
     }
 }
@@ -89,6 +91,7 @@ struct MainWindowView: View {
         switch selection {
         case .schedule: ScheduleDetailView()
         case .settings: SettingsView()
+        case .about:    AboutView()
         }
     }
 }
@@ -237,5 +240,54 @@ private struct DesktopPrayerRow: View {
         if prayer.isNext { return accentColor }
         if prayer.isPast { return .secondary }
         return .primary
+    }
+}
+
+// MARK: - About View
+
+private struct AboutView: View {
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            Image(systemName: "moon.stars.fill")
+                .font(.system(size: 64))
+                .foregroundStyle(Color.accent(for: colorScheme))
+
+            VStack(spacing: 6) {
+                Text("Afhara Adzan")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Text("Versi \(appVersion)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Text("Pengingat waktu sholat yang sederhana untuk macOS.\nMetode Kemenag RI — Fajr 20°, Isya 18°, Madhab Syafi'i.")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+
+            Divider()
+                .padding(.horizontal, 80)
+
+            Link(destination: URL(string: "https://github.com/irwancannadys/afhara-adzan")!) {
+                Label("Lihat di GitHub", systemImage: "arrow.up.right.square")
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(Color.accent(for: colorScheme))
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationTitle("Tentang")
     }
 }
