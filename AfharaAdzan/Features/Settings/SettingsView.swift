@@ -9,6 +9,16 @@ struct SettingsView: View {
     var body: some View {
         Form {
 
+            // MARK: Tampilan
+            Section("Tampilan") {
+                Picker("Tema", selection: $settings.appTheme) {
+                    ForEach(AppTheme.allCases, id: \.self) { theme in
+                        Label(theme.rawValue, systemImage: theme.icon).tag(theme)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
             // MARK: Notifikasi
             Section("Notifikasi") {
                 Toggle("Banner Notifikasi", isOn: $settings.isNotificationEnabled)

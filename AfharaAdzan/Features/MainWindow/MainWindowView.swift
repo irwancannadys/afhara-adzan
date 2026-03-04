@@ -17,6 +17,7 @@ enum MainNavItem: String, CaseIterable, Identifiable {
 struct MainWindowView: View {
 
     @Environment(AppState.self) private var appState
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selection: MainNavItem = .schedule
 
     var body: some View {
@@ -38,7 +39,7 @@ struct MainWindowView: View {
             HStack(spacing: 10) {
                 Image(systemName: "moon.stars.fill")
                     .font(.title2)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(.accent(for: colorScheme))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Afhara Adzan")
                         .font(.headline)
@@ -97,6 +98,7 @@ struct MainWindowView: View {
 private struct ScheduleDetailView: View {
 
     @Environment(AppState.self) private var appState
+    @Environment(\.colorScheme) private var colorScheme
 
     private var fardhuPrayers: [PrayerTime] {
         appState.prayerTimes.filter { $0.name.isFardhu }
@@ -126,7 +128,7 @@ private struct ScheduleDetailView: View {
                         Text("\(appState.nextPrayerName)  \(appState.countdownString)")
                             .font(.subheadline)
                             .fontWeight(.semibold)
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(.accent(for: colorScheme))
                             .monospacedDigit()
                     }
                 }
@@ -151,6 +153,8 @@ private struct ScheduleDetailView: View {
 
 private struct DesktopPrayerRow: View {
 
+    @Environment(\.colorScheme) private var colorScheme
+
     let prayer: PrayerTime
 
     var body: some View {
@@ -169,7 +173,7 @@ private struct DesktopPrayerRow: View {
                         Text("Sudah lewat")
                     } else if prayer.isNext {
                         Text("Waktu berikutnya")
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(.accent(for: colorScheme))
                     }
                 }
                 .font(.caption)
@@ -184,19 +188,21 @@ private struct DesktopPrayerRow: View {
                 .foregroundStyle(rowColor)
 
             Circle()
-                .fill(.orange)
+                .fill(accentColor)
                 .frame(width: 8, height: 8)
                 .opacity(prayer.isNext ? 1 : 0)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
-        .background(prayer.isNext ? Color.orange.opacity(0.07) : Color.clear)
+        .background(prayer.isNext ? accentColor.opacity(0.07) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .opacity(prayer.isPast ? 0.65 : 1.0)
     }
 
+    private var accentColor: Color { .accent(for: colorScheme) }
+
     private var rowColor: Color {
-        if prayer.isNext { return .orange }
+        if prayer.isNext { return accentColor }
         if prayer.isPast { return .secondary }
         return .primary
     }
