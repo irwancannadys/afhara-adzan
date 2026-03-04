@@ -2,7 +2,7 @@
 
 A minimal macOS menu bar app for Islamic prayer time reminders. Lives quietly in your status bar and notifies you when it's time to pray.
 
-![macOS](https://img.shields.io/badge/macOS-26%2B-black?logo=apple&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-14%2B-black?logo=apple&logoColor=white)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange?logo=swift&logoColor=white)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-%40Observable-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -72,7 +72,7 @@ open AfharaAdzan.xcodeproj
 
 Then press **⌘R** in Xcode.
 
-> **Note:** Add your own adzan MP3 file at `AfharaAdzan/Resources/Sounds/adzan_makkah.mp3` before building.
+> **Note:** On first build, Xcode may ask you to set a Development Team under **Signing & Capabilities**. Select your Apple ID or any available team.
 
 ---
 
