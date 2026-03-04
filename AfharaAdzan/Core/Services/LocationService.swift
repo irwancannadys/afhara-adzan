@@ -53,7 +53,7 @@ extension LocationService: @preconcurrency CLLocationManagerDelegate {
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         authStatus = manager.authorizationStatus
-        if authStatus == .authorizedAlways || authStatus == .authorized {
+        if authStatus == .authorizedAlways {
             fetchOnce()
         }
     }

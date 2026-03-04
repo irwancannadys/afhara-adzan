@@ -61,14 +61,13 @@ final class AppState {
             $0.name.isFardhu && !$0.isPast && !settings.mutedPrayers.contains($0.name)
         }
         for prayer in upcoming {
-            let delay     = prayer.time.timeIntervalSinceNow
-            let soundName = settings.selectedSound
+            let delay = prayer.time.timeIntervalSinceNow
             guard delay > 0 else { continue }
 
             let timer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
                 Task { @MainActor [weak self] in
                     guard let self, self.settings.isSoundEnabled else { return }
-                    AudioService.shared.playAdzan(soundName: soundName)
+                    AudioService.shared.playAdzan(soundName: self.settings.selectedSound)
                 }
             }
             audioTimers.append(timer)
