@@ -27,6 +27,8 @@ struct SettingsView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+
+                Toggle("Tampilkan Syuruq", isOn: $settings.showSyuruq)
             }
 
             // MARK: Notifikasi
@@ -121,9 +123,20 @@ struct SettingsView: View {
 
             // MARK: Metode Hisab
             Section("Metode Hisab") {
-                LabeledContent("Metode",  value: "Kemenag RI")
-                LabeledContent("Fajr",   value: "20\u{00B0}")
-                LabeledContent("Isya",   value: "18\u{00B0}")
+                Picker("Metode", selection: $settings.calculationMethod) {
+                    ForEach(CalculationMethod.allCases, id: \.self) { method in
+                        Text(method.rawValue).tag(method)
+                    }
+                }
+
+                LabeledContent("Fajr", value: String(format: "%.1f°", settings.calculationMethod.fajrAngle))
+
+                if let ishaAngle = settings.calculationMethod.ishaAngle {
+                    LabeledContent("Isya", value: String(format: "%.1f°", ishaAngle))
+                } else {
+                    LabeledContent("Isya", value: "Maghrib + \(Int(settings.calculationMethod.ishaInterval)) menit")
+                }
+
                 LabeledContent("Madhab", value: "Syafi\u{2019}i")
             }
 

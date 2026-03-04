@@ -38,7 +38,7 @@ final class AppState {
     // MARK: - Prayer Times
 
     func refreshPrayerTimes() {
-        prayerTimes = PrayerTimeCalculator.calculate(for: Date(), location: location)
+        prayerTimes = PrayerTimeCalculator.calculate(for: Date(), location: location, method: settings.calculationMethod)
         nextPrayer  = prayerTimes.first { $0.isNext }
 
         if settings.isNotificationEnabled {

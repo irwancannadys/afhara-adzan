@@ -104,7 +104,9 @@ private struct ScheduleDetailView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     private var fardhuPrayers: [PrayerTime] {
-        appState.prayerTimes.filter { $0.name.isFardhu }
+        appState.prayerTimes.filter {
+            $0.name.isFardhu || ($0.name == .sunrise && appState.settings.showSyuruq)
+        }
     }
 
     private var islamicDateString: String {

@@ -5,7 +5,9 @@ struct PrayerScheduleView: View {
     @Environment(AppState.self) private var appState
 
     private var fardhuPrayers: [PrayerTime] {
-        appState.prayerTimes.filter { $0.name.isFardhu }
+        appState.prayerTimes.filter {
+            $0.name.isFardhu || ($0.name == .sunrise && appState.settings.showSyuruq)
+        }
     }
 
     var body: some View {
