@@ -154,21 +154,19 @@ struct SettingsView: View {
     }
 
     private func saveManualCity() {
-        // Lookup koordinat kota secara geocoding
         let geocoder = CLGeocoder()
-        geocoder.geocodeAddressString(manualCity) { placemarks, _ in
-            guard let place = placemarks?.first,
+        Task {
+            guard let placemarks = try? await geocoder.geocodeAddressString(manualCity),
+                  let place = placemarks.first,
                   let coord = place.location?.coordinate else { return }
-            Task { @MainActor in
-                let tz = Double(TimeZone.current.secondsFromGMT() / 3600)
-                appState.location = LocationModel(
-                    latitude : coord.latitude,
-                    longitude: coord.longitude,
-                    cityName : place.locality ?? manualCity,
-                    timezone : tz
-                )
-                appState.saveSettings()
-            }
+            let tz = Double(TimeZone.current.secondsFromGMT() / 3600)
+            appState.location = LocationModel(
+                latitude : coord.latitude,
+                longitude: coord.longitude,
+                cityName : place.locality ?? manualCity,
+                timezone : tz
+            )
+            appState.saveSettings()
         }
     }
 }
