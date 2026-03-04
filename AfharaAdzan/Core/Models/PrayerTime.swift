@@ -25,7 +25,7 @@ enum PrayerName: String, CaseIterable, Codable, Identifiable {
 }
 
 struct PrayerTime: Identifiable, Equatable {
-    let id             = UUID()
+    var id             : PrayerName { name }
     let name           : PrayerName
     let time           : Date
     let timezoneOffset : Double
@@ -44,9 +44,13 @@ struct PrayerTime: Identifiable, Equatable {
         }
     }
 
-    var timeString: String {
+    private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "HH:mm"
-        return "\(f.string(from: time)) \(timezoneLabel)"
+        return f
+    }()
+
+    var timeString: String {
+        "\(Self.timeFormatter.string(from: time)) \(timezoneLabel)"
     }
 }
