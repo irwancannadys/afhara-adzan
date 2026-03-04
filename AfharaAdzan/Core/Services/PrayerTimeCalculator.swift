@@ -49,7 +49,7 @@ struct PrayerTimeCalculator {
         let now = Date()
         var results = rawTimes.compactMap { (name, hours) -> PrayerTime? in
             guard let time = makeDate(hours, from: date) else { return nil }
-            return PrayerTime(name: name, time: time, isPast: time < now)
+            return PrayerTime(name: name, time: time, timezoneOffset: tz, isPast: time < now)
         }
 
         // Tandai sholat fardhu berikutnya

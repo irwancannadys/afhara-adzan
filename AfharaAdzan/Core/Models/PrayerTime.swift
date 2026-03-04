@@ -25,15 +25,28 @@ enum PrayerName: String, CaseIterable, Codable, Identifiable {
 }
 
 struct PrayerTime: Identifiable, Equatable {
-    let id   = UUID()
-    let name : PrayerName
-    let time : Date
+    let id             = UUID()
+    let name           : PrayerName
+    let time           : Date
+    let timezoneOffset : Double
     var isNext: Bool = false
     var isPast: Bool = false
+
+    var timezoneLabel: String {
+        switch timezoneOffset {
+        case 7:  return "WIB"
+        case 8:  return "WITA"
+        case 9:  return "WIT"
+        default:
+            let sign = timezoneOffset >= 0 ? "+" : ""
+            let val  = timezoneOffset == timezoneOffset.rounded() ? "\(Int(timezoneOffset))" : "\(timezoneOffset)"
+            return "UTC\(sign)\(val)"
+        }
+    }
 
     var timeString: String {
         let f = DateFormatter()
         f.dateFormat = "HH:mm"
-        return f.string(from: time)
+        return "\(f.string(from: time)) \(timezoneLabel)"
     }
 }
