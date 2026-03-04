@@ -11,11 +11,17 @@ All notable changes to Afhara Adzan are documented here.
 - **Tampilkan Syuruq** — toggle opsional di Settings untuk menampilkan Syuruq di daftar jadwal (tanpa notifikasi/adzan)
 - **Multiple suara adzan** — bundling 2 suara tambahan (Makkah, Madinah)
 - **GitHub Actions release workflow** — build `.dmg` otomatis setiap push tag `v*`
+- **Build script lokal** — `scripts/build_dmg.sh` untuk generate DMG tanpa Xcode GUI
 
 ### Fixed
 - Auto-open desktop window on launch now works correctly
 - Prevent duplicate windows — clicking "Buka App" focuses the existing window instead of opening a new one
 - Theme applied consistently from startup via `AppDelegate.applicationDidFinishLaunching` (no longer flickers on first open)
+- Notifikasi dan adzan tidak lagi double-sound (system ding + MP3 bersamaan)
+- Suara adzan selalu sesuai pilihan terbaru user, bukan pilihan saat app pertama dibuka
+- Jadwal sholat otomatis refresh saat pergantian hari tanpa perlu restart app
+- `DateFormatter` dijadikan static — tidak lagi dibuat ulang tiap detik
+- `PrayerTime.id` pakai `PrayerName` — SwiftUI tidak re-render semua row tiap 60 detik
 
 ---
 

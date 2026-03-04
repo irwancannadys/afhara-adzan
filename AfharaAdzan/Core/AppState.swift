@@ -24,6 +24,7 @@ final class AppState {
     private var refreshTimer   : Timer?
     private var countdownTimer : Timer?
     private var audioTimers    : [Timer] = []
+    private var lastRefreshDay : Int = Calendar.current.component(.day, from: Date())
 
     // MARK: - Init
 
@@ -89,6 +90,13 @@ final class AppState {
     }
 
     private func updateCountdown() {
+        let today = Calendar.current.component(.day, from: Date())
+        if today != lastRefreshDay {
+            lastRefreshDay = today
+            refreshPrayerTimes()
+            return
+        }
+
         guard let next = nextPrayer else {
             countdownString = ""
             nextPrayerName  = ""
