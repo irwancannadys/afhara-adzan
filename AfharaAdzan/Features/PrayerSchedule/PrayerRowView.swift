@@ -29,7 +29,7 @@ struct PrayerRowView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 9)
-        .background(prayer.isNext ? accentColor.opacity(0.08) : Color.clear)
+        .background(prayer.isNext ? Color.accentBackground(for: colorScheme) : Color.clear)
         .opacity(prayer.isPast ? 0.65 : 1.0)
     }
 

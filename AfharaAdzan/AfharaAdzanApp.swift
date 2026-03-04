@@ -13,9 +13,13 @@ extension AppTheme {
 }
 
 extension Color {
-    /// Accent color dinamis: orange di dark mode, hijau medium di light mode.
+    /// Accent utama: #007200 di light, orange di dark.
     static func accent(for scheme: ColorScheme) -> Color {
-        scheme == .light ? Color(red: 0.22, green: 0.52, blue: 0.35) : .orange
+        scheme == .light ? Color(red: 0, green: 0.447, blue: 0) : .orange
+    }
+    /// Background highlight row: #F0F7EE di light, orange opacity di dark.
+    static func accentBackground(for scheme: ColorScheme) -> Color {
+        scheme == .light ? Color(red: 0.941, green: 0.969, blue: 0.933) : .orange.opacity(0.07)
     }
 }
 
