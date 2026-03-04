@@ -2,14 +2,9 @@ import Foundation
 
 struct PrayerTimeCalculator {
 
-    // MARK: - Kemenag RI Parameters
-    private static let fajrAngle  = 20.0   // derajat
-    private static let ishaAngle  = 18.0   // derajat
-    private static let asrFactor  = 1.0    // Syafi'i (1 = shadow same length as object)
-
     // MARK: - Public
 
-    static func calculate(for date: Date, location: LocationModel) -> [PrayerTime] {
+    static func calculate(for date: Date, location: LocationModel, method: CalculationMethod = .kemenagRI) -> [PrayerTime] {
         let cal = Calendar.current
         let y   = cal.component(.year,  from: date)
         let m   = cal.component(.month, from: date)
@@ -30,20 +25,30 @@ struct PrayerTimeCalculator {
         // Equation of time
         let EqT = q / 15.0 - normalizeHour(RA)
 
-        let lat     = location.latitude
-        let lng     = location.longitude
-        let tz      = location.timezone
+        let lat = location.latitude
+        let lng = location.longitude
+        let tz  = location.timezone
 
         // Transit = waktu dzuhur (saat matahari di meridian)
         let transit = 12.0 + tz - lng / 15.0 - EqT
 
+        let maghribHours = transit + hourAngle(-0.8333, lat: lat, dec: decl)
+
+        // Isha: angle-based atau fixed interval (Umm al-Qura)
+        let ishaHours: Double
+        if let angle = method.ishaAngle {
+            ishaHours = transit + hourAngle(-angle, lat: lat, dec: decl)
+        } else {
+            ishaHours = maghribHours + method.ishaInterval / 60.0
+        }
+
         let rawTimes: [(PrayerName, Double)] = [
-            (.fajr,    transit - hourAngle(-fajrAngle, lat: lat, dec: decl)),
-            (.sunrise, transit - hourAngle(-0.8333,    lat: lat, dec: decl)),
+            (.fajr,    transit - hourAngle(-method.fajrAngle, lat: lat, dec: decl)),
+            (.sunrise, transit - hourAngle(-0.8333,           lat: lat, dec: decl)),
             (.dhuhr,   transit),
             (.asr,     transit + asrHourAngle(lat: lat, dec: decl)),
-            (.maghrib, transit + hourAngle(-0.8333,    lat: lat, dec: decl)),
-            (.isha,    transit + hourAngle(-ishaAngle, lat: lat, dec: decl))
+            (.maghrib, maghribHours),
+            (.isha,    ishaHours)
         ]
 
         let now = Date()
@@ -80,7 +85,8 @@ struct PrayerTimeCalculator {
     }
 
     private static func asrHourAngle(lat: Double, dec: Double) -> Double {
-        let altitude = deg(atan(1.0 / (asrFactor + tan(rad(abs(lat - dec))))))
+        // Syafi'i (asrFactor = 1.0)
+        let altitude = deg(atan(1.0 / (1.0 + tan(rad(abs(lat - dec))))))
         return hourAngle(altitude, lat: lat, dec: dec)
     }
 

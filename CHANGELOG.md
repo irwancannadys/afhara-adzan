@@ -4,7 +4,13 @@ All notable changes to Afhara Adzan are documented here.
 
 ---
 
-## [Unreleased]
+## [1.3.0]
+
+### Added
+- **Metode hisab** — pilih antara Kemenag RI, Muslim World League, ISNA, Umm al-Qura, atau Egyptian. Parameter Fajr/Isha ditampilkan dinamis di Settings
+- **Tampilkan Syuruq** — toggle opsional di Settings untuk menampilkan Syuruq di daftar jadwal (tanpa notifikasi/adzan)
+- **Multiple suara adzan** — bundling 2 suara tambahan (Makkah, Madinah)
+- **GitHub Actions release workflow** — build `.dmg` otomatis setiap push tag `v*`
 
 ### Fixed
 - Auto-open desktop window on launch now works correctly
