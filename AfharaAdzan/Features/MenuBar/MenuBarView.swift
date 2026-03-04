@@ -104,7 +104,7 @@ struct MenuBarView: View {
             Spacer()
 
             Button {
-                openWindow(id: "main")
+                NSApp.focusOrOpenMainWindow { openWindow(id: "main") }
             } label: {
                 Label("Buka App", systemImage: "macwindow")
             }
