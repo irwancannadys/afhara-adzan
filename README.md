@@ -29,40 +29,35 @@ A minimal macOS menu bar app for Islamic prayer time reminders. Lives quietly in
 
 - **Status bar countdown** — shows next prayer name and time remaining, updates every second
 - **Prayer schedule** — all 5 fardhu prayers calculated for your current location
+- **Calculation method** — choose between Kemenag RI, MWL, ISNA, Umm al-Qura, or Egyptian
 - **Adzan audio** — plays MP3 at prayer time, stoppable from the menu bar
-- **Banner notifications** — macOS notification at each prayer time
+- **Multiple sounds** — Makkah and Madinah adzan included, easily extendable
+- **Banner notifications** — macOS notification at each prayer time, configurable per prayer
 - **Auto location** — detects your city via GPS, or set manually
-- **Kemenag RI method** — Fajr 20°, Isha 18°, Shafi'i madhab
-- **Theme switcher** — Light, Dark, or follow System preference (via Pengaturan)
-- **Dual date display** — shows Hijriah (Islamic) and Gregorian date in both the popup and desktop view
+- **Syuruq toggle** — optionally show Syuruq in the schedule (no notification or audio)
+- **Theme switcher** — Light, Dark, or follow System preference
+- **Dual date display** — shows Hijri (Islamic) and Gregorian date
 - **Timezone label** — prayer times shown with WIB / WITA / WIT label based on your location
-
----
-
-## Calculation Method
-
-Uses the **Kemenag RI** (Indonesian Ministry of Religious Affairs) astronomical algorithm based on the Jean Meeus solar position formula.
-
-| Parameter | Value |
-|-----------|-------|
-| Fajr      | 20° below horizon |
-| Sunrise   | −0.833° |
-| Asr       | Shafi'i (shadow factor 1×) |
-| Maghrib   | −0.833° |
-| Isha      | 18° below horizon |
-
----
-
-## Requirements
-
-- macOS 14 or later
-- Xcode 15 or later (to build from source)
 
 ---
 
 ## Installation
 
-**Build from source:**
+### Option 1 — Download DMG (Recommended)
+
+1. Go to the [latest release](https://github.com/irwancannadys/afhara-adzan/releases/latest)
+2. Download `AfharaAdzan-vX.X.X.dmg`
+3. Open the DMG, drag **AfharaAdzan** to **Applications**
+4. **First launch:** right-click → **Open** (instead of double-clicking)
+   > macOS will block the app on first double-click because it is not notarized.
+   > After allowing it once, it opens normally.
+
+**Alternative via Terminal:**
+```sh
+xattr -cr /Applications/AfharaAdzan.app
+```
+
+### Option 2 — Build from Source
 
 ```bash
 git clone https://github.com/irwancannadys/afhara-adzan.git
@@ -76,11 +71,27 @@ Then press **⌘R** in Xcode.
 
 ---
 
+## Calculation Method
+
+Supports multiple calculation methods. Default is **Kemenag RI** (Indonesian Ministry of Religious Affairs).
+
+| Method | Fajr | Isha |
+|--------|------|------|
+| Kemenag RI | 20° | 18° |
+| Muslim World League | 18° | 17° |
+| ISNA | 15° | 15° |
+| Umm al-Qura | 18.5° | Maghrib + 90 min |
+| Egyptian | 19.5° | 17.5° |
+
+Asr uses **Shafi'i madhab** (shadow factor 1×) for all methods.
+
+---
+
 ## Usage
 
 1. App appears in the **status bar** — click the icon to view the prayer schedule
-2. Click **Buka App** to open the full desktop window
-3. Open **Pengaturan** to configure location, notifications, and sound
+2. Click **Open App** to open the full desktop window
+3. Open **Settings** to configure location, notifications, sound, and calculation method
 4. **Stop Adzan** button appears automatically in the menu bar when audio is playing
 
 ---
@@ -103,13 +114,13 @@ Core/
 ├── AppState              ← single source of truth (@Observable)
 ├── Models/               ← PrayerTime, LocationModel, PrayerSettings
 └── Services/
-    ├── PrayerTimeCalculator  ← Kemenag RI algorithm (pure struct)
+    ├── PrayerTimeCalculator  ← multi-method algorithm (pure struct)
     ├── LocationService       ← CoreLocation wrapper
     ├── NotificationService   ← UNUserNotificationCenter
     └── AudioService          ← AVFoundation
 ```
 
-`AppState` runs two timers: a 60-second timer to recalculate prayer times and a 1-second timer to update the countdown string. Prayer audio is scheduled via dedicated `Timer` instances, separate from notifications.
+`AppState` runs two timers: a 60-second timer to recalculate prayer times and a 1-second timer to update the countdown string. Prayer audio is scheduled via dedicated `Timer` instances, separate from notifications. Schedule auto-refreshes at midnight without requiring an app restart.
 
 ---
 
