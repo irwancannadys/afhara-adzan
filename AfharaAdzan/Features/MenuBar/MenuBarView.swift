@@ -4,6 +4,7 @@ struct MenuBarView: View {
 
     @Environment(AppState.self) private var appState
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         VStack(spacing: 0) {
@@ -39,7 +40,7 @@ struct MenuBarView: View {
                     Text(appState.countdownString)
                         .font(.system(.callout, design: .monospaced))
                         .fontWeight(.semibold)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(.accent(for: colorScheme))
                 }
             }
         }

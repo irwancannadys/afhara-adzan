@@ -2,6 +2,8 @@ import SwiftUI
 
 struct PrayerRowView: View {
 
+    @Environment(\.colorScheme) private var colorScheme
+
     let prayer: PrayerTime
 
     var body: some View {
@@ -21,18 +23,20 @@ struct PrayerRowView: View {
                 .foregroundStyle(rowColor)
 
             Circle()
-                .fill(.orange)
+                .fill(accentColor)
                 .frame(width: 6, height: 6)
                 .opacity(prayer.isNext ? 1 : 0)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 9)
-        .background(prayer.isNext ? Color.orange.opacity(0.08) : Color.clear)
+        .background(prayer.isNext ? accentColor.opacity(0.08) : Color.clear)
         .opacity(prayer.isPast ? 0.65 : 1.0)
     }
 
+    private var accentColor: Color { .accent(for: colorScheme) }
+
     private var rowColor: Color {
-        if prayer.isNext { return .orange }
+        if prayer.isNext { return accentColor }
         if prayer.isPast { return .secondary }
         return .primary
     }
