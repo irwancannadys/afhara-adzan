@@ -29,7 +29,7 @@ final class NotificationService {
             let content      = UNMutableNotificationContent()
             content.title    = "Waktu \(prayer.name.rawValue)"
             content.body     = "Saatnya \(prayer.name.rawValue) \u{2014} \(prayer.timeString)"
-            content.sound    = settings.isSoundEnabled ? .default : nil
+            content.sound    = nil  // Audio ditangani AudioService — tidak double-sound
 
             var fireDate = prayer.time
             if settings.notificationOffset > 0 {
