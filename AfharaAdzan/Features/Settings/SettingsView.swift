@@ -5,6 +5,9 @@ struct SettingsView: View {
     @Environment(AppState.self) private var appState
     @State private var settings: PrayerSettings = PrayerSettings()
     @State private var manualCity: String = ""
+    @State private var showRestartAlert: Bool = false
+    @State private var showMadhabAlert: Bool = false
+    @State private var didAppear: Bool = false
 
     private var availableSounds: [String] {
         Bundle.main.paths(forResourcesOfType: "mp3", inDirectory: nil)
@@ -20,39 +23,39 @@ struct SettingsView: View {
         Form {
 
             // MARK: Tampilan
-            Section("Tampilan") {
-                Picker("Tema", selection: $settings.appTheme) {
+            Section(String(localized: "Tampilan")) {
+                Picker(String(localized: "Tema"), selection: $settings.appTheme) {
                     ForEach(AppTheme.allCases, id: \.self) { theme in
-                        Label(theme.rawValue, systemImage: theme.icon).tag(theme)
+                        Label(theme.localizedName, systemImage: theme.icon).tag(theme)
                     }
                 }
                 .pickerStyle(.segmented)
 
-                Toggle("Tampilkan Syuruq", isOn: $settings.showSyuruq)
+                Toggle(String(localized: "Tampilkan Syuruq"), isOn: $settings.showSyuruq)
             }
 
             // MARK: Notifikasi
-            Section("Notifikasi") {
-                Toggle("Banner Notifikasi", isOn: $settings.isNotificationEnabled)
-                Toggle("Countdown di Status Bar", isOn: $settings.isCountdownEnabled)
+            Section(String(localized: "Notifikasi")) {
+                Toggle(String(localized: "Banner Notifikasi"), isOn: $settings.isNotificationEnabled)
+                Toggle(String(localized: "Countdown di Status Bar"), isOn: $settings.isCountdownEnabled)
 
                 Stepper(
-                    "Notif \(settings.notificationOffset) menit sebelum",
+                    String(localized: "Notif \(settings.notificationOffset) menit sebelum"),
                     value: $settings.notificationOffset,
                     in: 0...30,
                     step: 5
                 )
                 .disabled(!settings.isNotificationEnabled)
 
-                Button("Stop Semua Notifikasi", role: .destructive) {
+                Button(String(localized: "Stop Semua Notifikasi"), role: .destructive) {
                     appState.stopAll()
                 }
             }
 
             // MARK: Notifikasi per Sholat
-            Section("Notifikasi per Waktu Sholat") {
+            Section(String(localized: "Notifikasi per Waktu Sholat")) {
                 ForEach(fardhuPrayerNames) { prayer in
-                    Toggle(prayer.rawValue, isOn: Binding(
+                    Toggle(prayer.localizedName, isOn: Binding(
                         get: { !settings.mutedPrayers.contains(prayer) },
                         set: { enabled in
                             if enabled { settings.mutedPrayers.remove(prayer) }
@@ -64,11 +67,11 @@ struct SettingsView: View {
             .disabled(!settings.isNotificationEnabled)
 
             // MARK: Suara Adzan
-            Section("Suara Adzan") {
-                Toggle("Aktifkan Suara", isOn: $settings.isSoundEnabled)
+            Section(String(localized: "Suara Adzan")) {
+                Toggle(String(localized: "Aktifkan Suara"), isOn: $settings.isSoundEnabled)
 
                 if !availableSounds.isEmpty {
-                    Picker("Pilih Suara", selection: $settings.selectedSound) {
+                    Picker(String(localized: "Pilih Suara"), selection: $settings.selectedSound) {
                         ForEach(availableSounds, id: \.self) { sound in
                             Text(sound.replacingOccurrences(of: "_", with: " ").capitalized)
                                 .tag(sound)
@@ -95,57 +98,156 @@ struct SettingsView: View {
                 }
             }
 
+            // MARK: Doa Setelah Adzan
+            Section(String(localized: "Doa Setelah Adzan")) {
+                Toggle(String(localized: "Tampilkan Doa Setelah Adzan"), isOn: $settings.showDuaAfterAdzan)
+                Stepper(
+                    String(localized: "Auto-dismiss \(settings.duaDismissSeconds) detik"),
+                    value: $settings.duaDismissSeconds,
+                    in: 0...120,
+                    step: 5
+                )
+                .disabled(!settings.showDuaAfterAdzan)
+
+                if settings.duaDismissSeconds == 0 {
+                    Text(String(localized: "Doa tidak akan otomatis hilang"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            // MARK: Iqamah
+            Section("Iqamah") {
+                Toggle(String(localized: "Aktifkan Iqamah Timer"), isOn: $settings.iqamahEnabled)
+                Stepper(
+                    String(localized: "Durasi \(settings.iqamahDurationMinutes) menit"),
+                    value: $settings.iqamahDurationMinutes,
+                    in: 1...30,
+                    step: 1
+                )
+                .disabled(!settings.iqamahEnabled)
+            }
+
+            #if DEBUG
+            // MARK: Test Adzan (Debug Only)
+            Section("Test Adzan") {
+                Button {
+                    appState.simulateAdzan()
+                } label: {
+                    Label(String(localized: "Simulasi Adzan Sekarang"), systemImage: "play.circle.fill")
+                }
+
+                Text(String(localized: "Akan memainkan adzan, lalu trigger doa banner + iqamah countdown setelah selesai."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            #endif
+
             // MARK: Lokasi
-            Section("Lokasi") {
-                Toggle("Lokasi Otomatis (GPS)", isOn: $settings.useAutoLocation)
+            Section(String(localized: "Lokasi")) {
+                Toggle(String(localized: "Lokasi Otomatis (GPS)"), isOn: $settings.useAutoLocation)
                     .onChange(of: settings.useAutoLocation) { _, useAuto in
                         if useAuto { appState.requestLocation() }
                     }
 
                 if !settings.useAutoLocation {
                     HStack {
-                        TextField("Nama kota", text: $manualCity)
-                        Button("Simpan") {
+                        TextField(String(localized: "Nama kota"), text: $manualCity)
+                        Button(String(localized: "Simpan")) {
                             saveManualCity()
                         }
                         .disabled(manualCity.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
 
-                LabeledContent("Lokasi saat ini", value: appState.location.cityName)
+                LabeledContent(String(localized: "Lokasi saat ini"), value: appState.location.cityName)
                     .foregroundStyle(.secondary)
             }
 
             // MARK: Sistem
-            Section("Sistem") {
-                Toggle("Buka saat Login", isOn: $settings.launchAtLogin)
+            Section(String(localized: "Sistem")) {
+                Toggle(String(localized: "Buka saat Login"), isOn: $settings.launchAtLogin)
+            }
+
+            // MARK: Bahasa
+            Section(String(localized: "Bahasa")) {
+                Picker(String(localized: "Bahasa Aplikasi"), selection: $settings.appLanguage) {
+                    ForEach(AppLanguage.allCases, id: \.self) { lang in
+                        Text(lang.displayName).tag(lang)
+                    }
+                }
+                .onChange(of: settings.appLanguage) { _, newLang in
+                    UserDefaults.standard.set([newLang.localeIdentifier], forKey: "AppleLanguages")
+                    UserDefaults.standard.synchronize()
+                    showRestartAlert = true
+                }
+
+                Text(String(localized: "Perubahan bahasa memerlukan restart aplikasi"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .alert(String(localized: "Restart Aplikasi"), isPresented: $showRestartAlert) {
+                Button(String(localized: "Restart Sekarang")) {
+                    // Save settings dulu, lalu restart
+                    appState.settings = settings
+                    appState.saveSettings()
+                    let task = Process()
+                    task.launchPath = "/usr/bin/open"
+                    task.arguments = ["-n", Bundle.main.bundlePath]
+                    task.launch()
+                    NSApplication.shared.terminate(nil)
+                }
+                Button(String(localized: "Nanti"), role: .cancel) { }
+            } message: {
+                Text(String(localized: "Aplikasi perlu di-restart agar perubahan bahasa diterapkan. Restart sekarang?"))
             }
 
             // MARK: Metode Hisab
-            Section("Metode Hisab") {
-                Picker("Metode", selection: $settings.calculationMethod) {
+            Section(String(localized: "Metode Hisab")) {
+                Picker(String(localized: "Metode"), selection: $settings.calculationMethod) {
                     ForEach(CalculationMethod.allCases, id: \.self) { method in
-                        Text(method.rawValue).tag(method)
+                        Text(method.localizedName).tag(method)
                     }
                 }
 
                 LabeledContent("Fajr", value: String(format: "%.1f°", settings.calculationMethod.fajrAngle))
 
                 if let ishaAngle = settings.calculationMethod.ishaAngle {
-                    LabeledContent("Isya", value: String(format: "%.1f°", ishaAngle))
+                    LabeledContent(String(localized: "Isya"), value: String(format: "%.1f°", ishaAngle))
                 } else {
-                    LabeledContent("Isya", value: "Maghrib + \(Int(settings.calculationMethod.ishaInterval)) menit")
+                    LabeledContent(String(localized: "Isya"), value: String(localized: "Maghrib + \(Int(settings.calculationMethod.ishaInterval)) menit"))
                 }
 
-                LabeledContent("Madhab", value: "Syafi\u{2019}i")
+                Picker("Madhab", selection: $settings.asrMadhab) {
+                    ForEach(AsrMadhab.allCases, id: \.self) { madhab in
+                        Text(madhab.rawValue).tag(madhab)
+                    }
+                }
+                .onChange(of: settings.asrMadhab) { _, _ in
+                    guard didAppear else { return }
+                    showMadhabAlert = true
+                }
+
+                if let asrTime = appState.prayerTimes.first(where: { $0.name == .asr }) {
+                    LabeledContent(String(localized: "Ashar hari ini"), value: asrTime.timeString)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .alert(String(localized: "Madhab Diubah"), isPresented: $showMadhabAlert) {
+                Button("OK") { }
+            } message: {
+                if let asrTime = appState.prayerTimes.first(where: { $0.name == .asr }) {
+                    Text(String(localized: "Madhab berhasil diubah ke \(settings.asrMadhab.rawValue). Waktu Ashar hari ini: \(asrTime.timeString)"))
+                }
             }
 
         }
         .formStyle(.grouped)
-        .navigationTitle("Pengaturan")
+        .navigationTitle(String(localized: "Pengaturan"))
         .onAppear {
             settings   = appState.settings
             manualCity = appState.location.cityName
+            DispatchQueue.main.async { didAppear = true }
         }
         .onChange(of: settings) { _, newVal in
             appState.settings = newVal

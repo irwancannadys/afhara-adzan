@@ -12,7 +12,7 @@ struct PrayerRowView: View {
                 .frame(width: 20)
                 .foregroundStyle(rowColor)
 
-            Text(prayer.name.rawValue)
+            Text(prayer.name.localizedName)
                 .fontWeight(prayer.isNext ? .semibold : .regular)
                 .foregroundStyle(prayer.isPast ? .secondary : .primary)
 

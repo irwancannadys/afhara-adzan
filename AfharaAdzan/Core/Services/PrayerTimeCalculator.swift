@@ -4,7 +4,7 @@ struct PrayerTimeCalculator {
 
     // MARK: - Public
 
-    static func calculate(for date: Date, location: LocationModel, method: CalculationMethod = .kemenagRI) -> [PrayerTime] {
+    static func calculate(for date: Date, location: LocationModel, method: CalculationMethod = .kemenagRI, asrMadhab: AsrMadhab = .shafii) -> [PrayerTime] {
         let cal = Calendar.current
         let y   = cal.component(.year,  from: date)
         let m   = cal.component(.month, from: date)
@@ -46,7 +46,7 @@ struct PrayerTimeCalculator {
             (.fajr,    transit - hourAngle(-method.fajrAngle, lat: lat, dec: decl)),
             (.sunrise, transit - hourAngle(-0.8333,           lat: lat, dec: decl)),
             (.dhuhr,   transit),
-            (.asr,     transit + asrHourAngle(lat: lat, dec: decl)),
+            (.asr,     transit + asrHourAngle(lat: lat, dec: decl, shadowFactor: asrMadhab.shadowFactor)),
             (.maghrib, maghribHours),
             (.isha,    ishaHours)
         ]
@@ -84,9 +84,8 @@ struct PrayerTimeCalculator {
         return deg(acos(cosHA)) / 15.0
     }
 
-    private static func asrHourAngle(lat: Double, dec: Double) -> Double {
-        // Syafi'i (asrFactor = 1.0)
-        let altitude = deg(atan(1.0 / (1.0 + tan(rad(abs(lat - dec))))))
+    private static func asrHourAngle(lat: Double, dec: Double, shadowFactor: Double = 1.0) -> Double {
+        let altitude = deg(atan(1.0 / (shadowFactor + tan(rad(abs(lat - dec))))))
         return hourAngle(altitude, lat: lat, dec: dec)
     }
 

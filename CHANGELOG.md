@@ -4,6 +4,26 @@ All notable changes to Afhara Adzan are documented here.
 
 ---
 
+## [1.4.0]
+
+### Added
+- **Asr madhab selector** — choose between Syafi'i (shadow factor 1×) and Hanafi (shadow factor 2×) in Settings, with confirmation alert showing updated Asr time
+- **Iqamah countdown timer** — configurable countdown (default 5 minutes) starts automatically after adzan finishes, displayed in both menu bar and desktop dashboard
+- **Doa after adzan banner** — Arabic text, transliteration, and Indonesian translation shown in menu bar and desktop dashboard after adzan, auto-dismisses before iqamah ends
+- **Per-prayer mute for adzan sound** — individually mute adzan audio per prayer (separate from notification toggle)
+- **Foreground notification support** — macOS notifications now display even when the app is in the foreground via `UNUserNotificationCenterDelegate`
+- **Iqamah notification** — system notification fires when iqamah countdown reaches zero
+- **Simulate adzan button** — debug-only button in Settings to test the full adzan → doa → iqamah flow without waiting for prayer time
+- **Multi-language support** — language selector (Indonesian / English) with restart prompt
+- **Unit tests** — 51 tests covering madhab calculation, notification scheduling, iqamah state machine, and end-to-end simulation
+
+### Fixed
+- Notification permission now properly requested on first launch
+- Doa text no longer truncated in menu bar — transliteration and translation wrap correctly
+- Iqamah countdown text displayed in red for better visibility
+
+---
+
 ## [1.3.0]
 
 ### Added

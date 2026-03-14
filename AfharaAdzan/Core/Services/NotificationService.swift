@@ -23,12 +23,15 @@ final class NotificationService {
         guard settings.isNotificationEnabled else { return }
 
         let center = UNUserNotificationCenter.current()
-        center.removeAllPendingNotificationRequests()
+
+        // Hapus hanya prayer notifications, jangan iqamah
+        let prayerIds = PrayerName.allCases.map { "prayer_\($0.rawValue)" }
+        center.removePendingNotificationRequests(withIdentifiers: prayerIds)
 
         for prayer in prayerTimes where prayer.name.isFardhu && !prayer.isPast && !settings.mutedPrayers.contains(prayer.name) {
             let content      = UNMutableNotificationContent()
-            content.title    = "Waktu \(prayer.name.rawValue)"
-            content.body     = "Saatnya \(prayer.name.rawValue) \u{2014} \(prayer.timeString)"
+            content.title    = String(localized: "Waktu \(prayer.name.localizedName)")
+            content.body     = String(localized: "Saatnya \(prayer.name.localizedName) — \(prayer.timeString)")
             content.sound    = nil  // Audio ditangani AudioService — tidak double-sound
 
             var fireDate = prayer.time
@@ -48,6 +51,23 @@ final class NotificationService {
             )
             center.add(request)
         }
+    }
+
+    // MARK: - Iqamah Notification
+
+    func sendIqamahNotification(for prayerName: String) {
+        let content      = UNMutableNotificationContent()
+        content.title    = String(localized: "Waktu Iqamah")
+        content.body     = String(localized: "Saatnya iqamah \(prayerName)")
+        content.sound    = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: "iqamah_\(prayerName)",
+            content: content,
+            trigger: trigger
+        )
+        UNUserNotificationCenter.current().add(request)
     }
 
     // MARK: - Cancel
