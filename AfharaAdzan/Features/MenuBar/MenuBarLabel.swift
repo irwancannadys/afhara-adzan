@@ -10,7 +10,12 @@ struct MenuBarLabel: View {
             Image(systemName: "moon.stars.fill")
                 .symbolRenderingMode(.hierarchical)
 
-            if appState.settings.isCountdownEnabled,
+            if case .countdown(let prayerName, let remaining) = appState.iqamahState {
+                let minutes = remaining / 60
+                let seconds = remaining % 60
+                Text(String(localized: "Iqamah \(prayerName) \u{2022} \(String(format: "%02d:%02d", minutes, seconds))"))
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+            } else if appState.settings.isCountdownEnabled,
                !appState.nextPrayerName.isEmpty {
                 Text("\(appState.nextPrayerName) \u{2022} \(appState.countdownString)")
                     .font(.system(size: 12, weight: .medium, design: .monospaced))

@@ -22,6 +22,17 @@ enum PrayerName: String, CaseIterable, Codable, Identifiable {
     }
 
     var isFardhu: Bool { self != .sunrise }
+
+    var localizedName: String {
+        switch self {
+        case .fajr:    String(localized: "Subuh")
+        case .sunrise: String(localized: "Syuruq")
+        case .dhuhr:   String(localized: "Dzuhur")
+        case .asr:     String(localized: "Ashar")
+        case .maghrib: String(localized: "Maghrib")
+        case .isha:    String(localized: "Isya")
+        }
+    }
 }
 
 struct PrayerTime: Identifiable, Equatable {

@@ -3,6 +3,16 @@ import CoreLocation
 import Observation
 import ServiceManagement
 
+enum IqamahState: Equatable {
+    case idle
+    case countdown(prayerName: String, remaining: Int)
+
+    var isActive: Bool {
+        if case .idle = self { return false }
+        return true
+    }
+}
+
 @Observable
 @MainActor
 final class AppState {
@@ -18,6 +28,12 @@ final class AppState {
     var countdownString: String = ""
     var nextPrayerName : String = ""
 
+    // Doa setelah adzan
+    var showDoaBanner  : Bool = false
+
+    // Iqamah
+    var iqamahState    : IqamahState = .idle
+
     // MARK: - Private
 
     private let locationService = LocationService()
@@ -25,6 +41,14 @@ final class AppState {
     private var countdownTimer : Timer?
     private var audioTimers    : [Timer] = []
     private var lastRefreshDay : Int = Calendar.current.component(.day, from: Date())
+
+    // Iqamah internals
+    private var iqamahEndTime  : Date?
+    private var iqamahPrayerName: String = ""
+    private var currentAdzanPrayer: String = ""
+
+    // Doa dismiss timer
+    private var doaDismissTimer: Timer?
 
     // MARK: - Init
 
@@ -34,12 +58,23 @@ final class AppState {
         startRefreshTimer()
         startCountdownTimer()
         observeLocation()
+
+        // Request notification permission saat pertama kali launch
+        Task {
+            await NotificationService.shared.requestPermission()
+        }
+
+        AudioService.shared.onAdzanFinished = { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.handleAdzanFinished()
+            }
+        }
     }
 
     // MARK: - Prayer Times
 
     func refreshPrayerTimes() {
-        prayerTimes = PrayerTimeCalculator.calculate(for: Date(), location: location, method: settings.calculationMethod)
+        prayerTimes = PrayerTimeCalculator.calculate(for: Date(), location: location, method: settings.calculationMethod, asrMadhab: settings.asrMadhab)
         nextPrayer  = prayerTimes.first { $0.isNext }
 
         if settings.isNotificationEnabled {
@@ -68,11 +103,66 @@ final class AppState {
             let timer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
                 Task { @MainActor [weak self] in
                     guard let self, self.settings.isSoundEnabled else { return }
+                    self.currentAdzanPrayer = prayer.name.localizedName
                     AudioService.shared.playAdzan(soundName: self.settings.selectedSound)
                 }
             }
             audioTimers.append(timer)
         }
+    }
+
+    // MARK: - Adzan Finished Handler
+
+    private func handleAdzanFinished() {
+        let prayerName = currentAdzanPrayer
+
+        // Doa setelah adzan — tampil selama (iqamah duration - 10 detik)
+        if settings.showDuaAfterAdzan {
+            showDoaBanner = true
+            doaDismissTimer?.invalidate()
+            let doaDuration = max(Double(settings.iqamahDurationMinutes) * 60 - 10, 5)
+            doaDismissTimer = Timer.scheduledTimer(withTimeInterval: doaDuration, repeats: false) { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.showDoaBanner = false
+                }
+            }
+        }
+
+        // Iqamah countdown
+        if settings.iqamahEnabled {
+            startIqamahCountdown(for: prayerName)
+        }
+    }
+
+    func dismissDoaBanner() {
+        showDoaBanner = false
+        doaDismissTimer?.invalidate()
+        doaDismissTimer = nil
+    }
+
+    // MARK: - Iqamah
+
+    private func startIqamahCountdown(for prayerName: String) {
+        iqamahPrayerName = prayerName
+        iqamahEndTime = Date().addingTimeInterval(Double(settings.iqamahDurationMinutes) * 60)
+        updateIqamahCountdown()
+    }
+
+    private func updateIqamahCountdown() {
+        guard let endTime = iqamahEndTime else {
+            iqamahState = .idle
+            return
+        }
+
+        let remaining = Int(endTime.timeIntervalSinceNow)
+        if remaining <= 0 {
+            iqamahState = .idle
+            iqamahEndTime = nil
+            NotificationService.shared.sendIqamahNotification(for: iqamahPrayerName)
+            return
+        }
+
+        iqamahState = .countdown(prayerName: iqamahPrayerName, remaining: remaining)
     }
 
     // MARK: - Timers
@@ -85,7 +175,10 @@ final class AppState {
 
     private func startCountdownTimer() {
         countdownTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in self?.updateCountdown() }
+            Task { @MainActor [weak self] in
+                self?.updateCountdown()
+                self?.updateIqamahCountdown()
+            }
         }
     }
 
@@ -110,7 +203,7 @@ final class AppState {
         let m = (Int(diff) % 3600) / 60
         let s = Int(diff) % 60
 
-        nextPrayerName  = next.name.rawValue
+        nextPrayerName  = next.name.localizedName
         countdownString = h > 0
             ? String(format: "%dj %02dm", h, m)
             : String(format: "%02dm %02ds", m, s)
@@ -150,11 +243,31 @@ final class AppState {
         locationService.fetchOnce()
     }
 
+    // MARK: - Simulate (Debug)
+
+    #if DEBUG
+    func simulateAdzan() {
+        let prayerName = nextPrayer?.name.localizedName ?? "Test"
+        currentAdzanPrayer = prayerName
+        // Skip adzan MP3, langsung trigger setelah 3 detik
+        Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.handleAdzanFinished()
+            }
+        }
+    }
+    #endif
+
     // MARK: - Stop All
 
     func stopAll() {
         NotificationService.shared.cancelAll()
         AudioService.shared.stopAdzan()
+
+        // Cleanup doa & iqamah state
+        dismissDoaBanner()
+        iqamahState = .idle
+        iqamahEndTime = nil
     }
 
     // MARK: - Persistence

@@ -14,6 +14,14 @@ enum MainNavItem: String, CaseIterable, Identifiable {
         case .about:    "info.circle.fill"
         }
     }
+
+    var localizedName: String {
+        switch self {
+        case .schedule: String(localized: "Jadwal Sholat")
+        case .settings: String(localized: "Pengaturan")
+        case .about:    String(localized: "Tentang")
+        }
+    }
 }
 
 struct MainWindowView: View {
@@ -59,7 +67,7 @@ struct MainWindowView: View {
 
             // Nav items
             List(MainNavItem.allCases, selection: $selection) { item in
-                Label(item.rawValue, systemImage: item.icon)
+                Label(item.localizedName, systemImage: item.icon)
                     .tag(item)
             }
             .listStyle(.sidebar)
@@ -73,7 +81,7 @@ struct MainWindowView: View {
             Button(role: .destructive) {
                 NSApplication.shared.terminate(nil)
             } label: {
-                Label("Keluar", systemImage: "power")
+                Label(String(localized: "Keluar"), systemImage: "power")
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .buttonStyle(.plain)
@@ -109,26 +117,16 @@ private struct ScheduleDetailView: View {
         }
     }
 
-    private var islamicDateString: String {
-        let cal   = Calendar(identifier: .islamicUmmAlQura)
-        let comp  = cal.dateComponents([.year, .month, .day], from: Date())
-        guard let day = comp.day, let month = comp.month, let year = comp.year else { return "" }
-        let months = ["Muharram","Safar","Rabi'ul Awal","Rabi'ul Akhir",
-                      "Jumadil Awal","Jumadil Akhir","Rajab","Sya'ban",
-                      "Ramadan","Syawal","Dzulqa'dah","Dzulhijjah"]
-        return "\(day) \(months[month - 1]) \(year) H"
-    }
-
     var body: some View {
         VStack(spacing: 0) {
 
             // Date banner: Hijriah (kiri) + Masehi (kanan)
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Tanggal Hijriah")
+                    Text(String(localized: "Tanggal Hijriah"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(islamicDateString)
+                    Text(IslamicCalendarHelper.islamicDateString())
                         .font(.title3)
                         .fontWeight(.semibold)
                 }
@@ -136,7 +134,7 @@ private struct ScheduleDetailView: View {
                 Spacer()
 
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text("Tanggal Masehi")
+                    Text(String(localized: "Tanggal Masehi"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide).year()))
@@ -159,7 +157,7 @@ private struct ScheduleDetailView: View {
 
                 if !appState.nextPrayerName.isEmpty {
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text("Berikutnya")
+                        Text(String(localized: "Berikutnya"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Text("\(appState.nextPrayerName)  \(appState.countdownString)")
@@ -176,13 +174,57 @@ private struct ScheduleDetailView: View {
             Divider()
 
             // Prayer list
-            List(fardhuPrayers) { prayer in
-                DesktopPrayerRow(prayer: prayer)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 4, leading: 20, bottom: 4, trailing: 20))
+            List {
+                if appState.showDoaBanner {
+                    DuaAfterAdzanView()
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                }
+                if case .countdown(let prayerName, let remaining) = appState.iqamahState {
+                    IqamahBannerRow(prayerName: prayerName, remaining: remaining)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 20, bottom: 4, trailing: 20))
+                }
+                ForEach(fardhuPrayers) { prayer in
+                    DesktopPrayerRow(prayer: prayer)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 20, bottom: 4, trailing: 20))
+                }
             }
             .listStyle(.plain)
         }
+    }
+}
+
+// MARK: - Iqamah Banner Row
+
+private struct IqamahBannerRow: View {
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    let prayerName: String
+    let remaining: Int
+
+    var body: some View {
+        HStack {
+            Image(systemName: "bell.badge.fill")
+                .font(.title3)
+                .foregroundStyle(Color.accent(for: colorScheme))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(localized: "Iqamah \(prayerName)"))
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text(String(format: "%02d:%02d", remaining / 60, remaining % 60))
+                    .font(.system(.subheadline, design: .monospaced))
+                    .fontWeight(.medium)
+                    .foregroundStyle(.red)
+            }
+            Spacer()
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(Color.accentBackground(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
 
@@ -202,14 +244,14 @@ private struct DesktopPrayerRow: View {
                 .foregroundStyle(rowColor)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(prayer.name.rawValue)
+                Text(prayer.name.localizedName)
                     .font(.body)
                     .fontWeight(prayer.isNext ? .semibold : .regular)
                 Group {
                     if prayer.isPast {
-                        Text("Sudah lewat")
+                        Text(String(localized: "Sudah lewat"))
                     } else if prayer.isNext {
-                        Text("Waktu berikutnya")
+                        Text(String(localized: "Waktu berikutnya"))
                             .foregroundStyle(Color.accent(for: colorScheme))
                     }
                 }
@@ -267,12 +309,12 @@ private struct AboutView: View {
                 Text("Afhara Adzan")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                Text("Versi \(appVersion)")
+                Text(String(localized: "Versi \(appVersion)"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
-            Text("Pengingat waktu sholat yang sederhana untuk macOS.\nMetode Kemenag RI — Fajr 20°, Isya 18°, Madhab Syafi'i.")
+            Text(String(localized: "Pengingat waktu sholat yang sederhana untuk macOS.\nMetode Kemenag RI — Fajr 20°, Isya 18°."))
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -282,7 +324,7 @@ private struct AboutView: View {
                 .padding(.horizontal, 80)
 
             Link(destination: URL(string: "https://github.com/irwancannadys/afhara-adzan")!) {
-                Label("Lihat di GitHub", systemImage: "arrow.up.right.square")
+                Label(String(localized: "Lihat di GitHub"), systemImage: "arrow.up.right.square")
             }
             .buttonStyle(.plain)
             .foregroundStyle(Color.accent(for: colorScheme))
@@ -290,6 +332,6 @@ private struct AboutView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle("Tentang")
+        .navigationTitle(String(localized: "Tentang"))
     }
 }

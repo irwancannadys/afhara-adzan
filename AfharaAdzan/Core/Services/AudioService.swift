@@ -8,6 +8,7 @@ final class AudioService: NSObject {
     static let shared = AudioService()
 
     var isPlaying: Bool = false
+    var onAdzanFinished: (() -> Void)?
 
     private var player: AVAudioPlayer?
 
@@ -37,6 +38,7 @@ final class AudioService: NSObject {
         player?.stop()
         player    = nil
         isPlaying = false
+        // Manual stop = TIDAK trigger onAdzanFinished
     }
 }
 
@@ -45,5 +47,6 @@ final class AudioService: NSObject {
 extension AudioService: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         isPlaying = false
+        onAdzanFinished?()
     }
 }

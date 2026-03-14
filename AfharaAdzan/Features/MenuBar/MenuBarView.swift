@@ -10,13 +10,26 @@ struct MenuBarView: View {
         VStack(spacing: 0) {
             headerView
             Divider()
+
+            // Doa setelah adzan banner
+            if appState.showDoaBanner {
+                DuaAfterAdzanView()
+                Divider()
+            }
+
+            // Iqamah countdown banner
+            if case .countdown(let prayerName, let remaining) = appState.iqamahState {
+                iqamahBannerView(prayerName: prayerName, remaining: remaining)
+                Divider()
+            }
+
             dateBannerView
             Divider()
             PrayerScheduleView()
             Divider()
             footerView
         }
-        .frame(width: 300)
+        .frame(width: 360)
         .background(Color(NSColor.windowBackgroundColor))
     }
 
@@ -51,15 +64,39 @@ struct MenuBarView: View {
         .padding(.vertical, 12)
     }
 
+    // MARK: - Iqamah Banner
+
+    private func iqamahBannerView(prayerName: String, remaining: Int) -> some View {
+        let minutes = remaining / 60
+        let seconds = remaining % 60
+        return HStack {
+            Image(systemName: "bell.badge.fill")
+                .foregroundStyle(Color.accent(for: colorScheme))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(String(localized: "Iqamah \(prayerName)"))
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Text(String(format: "%02d:%02d", minutes, seconds))
+                    .font(.system(.caption, design: .monospaced))
+                    .fontWeight(.medium)
+                    .foregroundStyle(.red)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color.accentBackground(for: colorScheme))
+    }
+
     // MARK: - Date Banner
 
     private var dateBannerView: some View {
         HStack {
             VStack(alignment: .leading, spacing: 1) {
-                Text("Hijriah")
+                Text(String(localized: "Hijriah"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                Text(islamicDateString)
+                Text(IslamicCalendarHelper.islamicDateString())
                     .font(.caption)
                     .fontWeight(.semibold)
             }
@@ -67,7 +104,7 @@ struct MenuBarView: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 1) {
-                Text("Masehi")
+                Text(String(localized: "Masehi"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                 Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).year()))
@@ -79,22 +116,12 @@ struct MenuBarView: View {
         .padding(.vertical, 8)
     }
 
-    private var islamicDateString: String {
-        let cal  = Calendar(identifier: .islamicUmmAlQura)
-        let comp = cal.dateComponents([.year, .month, .day], from: Date())
-        guard let day = comp.day, let month = comp.month, let year = comp.year else { return "" }
-        let months = ["Muharram","Safar","Rabi'ul Awal","Rabi'ul Akhir",
-                      "Jumadil Awal","Jumadil Akhir","Rajab","Sya'ban",
-                      "Ramadan","Syawal","Dzulqa'dah","Dzulhijjah"]
-        return "\(day) \(months[month - 1]) \(year) H"
-    }
-
     // MARK: - Footer
 
     private var footerView: some View {
         HStack {
             if AudioService.shared.isPlaying {
-                Button("Stop Adzan") {
+                Button(String(localized: "Stop Adzan")) {
                     AudioService.shared.stopAdzan()
                 }
                 .foregroundStyle(.red)
@@ -106,7 +133,7 @@ struct MenuBarView: View {
             Button {
                 NSApp.focusOrOpenMainWindow { openWindow(id: "main") }
             } label: {
-                Label("Buka App", systemImage: "macwindow")
+                Label(String(localized: "Buka App"), systemImage: "macwindow")
             }
             .buttonStyle(.plain)
 
@@ -117,7 +144,7 @@ struct MenuBarView: View {
             Button {
                 NSApplication.shared.terminate(nil)
             } label: {
-                Label("Keluar", systemImage: "power")
+                Label(String(localized: "Keluar"), systemImage: "power")
             }
             .buttonStyle(.plain)
         }

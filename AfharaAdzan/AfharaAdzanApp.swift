@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 // MARK: - Window Helper
 
@@ -45,12 +46,27 @@ extension Color {
 /// Dipakai untuk menerapkan tema SEBELUM window apapun muncul.
 /// NSApp belum ready saat App.init() — AppDelegate.applicationDidFinishLaunching
 /// adalah tempat paling awal yang aman untuk mengakses NSApp.
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let data     = UserDefaults.standard.data(forKey: "prayer_settings"),
            let settings = try? JSONDecoder().decode(PrayerSettings.self, from: data) {
             NSApp.appearance = settings.appTheme.nsAppearance
+
+            // Apply language override
+            UserDefaults.standard.set([settings.appLanguage.localeIdentifier], forKey: "AppleLanguages")
+            UserDefaults.standard.synchronize()
         }
+
+        // Agar notifikasi tetap muncul walau app di foreground
+        UNUserNotificationCenter.current().delegate = self
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound])
     }
 }
 
