@@ -2,6 +2,7 @@ import SwiftUI
 
 enum MainNavItem: String, CaseIterable, Identifiable {
     case schedule = "Jadwal Sholat"
+    case quran    = "Al-Quran"
     case settings = "Pengaturan"
     case about    = "Tentang"
 
@@ -10,6 +11,7 @@ enum MainNavItem: String, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .schedule: "clock.fill"
+        case .quran:    "book.fill"
         case .settings: "gearshape.fill"
         case .about:    "info.circle.fill"
         }
@@ -18,6 +20,7 @@ enum MainNavItem: String, CaseIterable, Identifiable {
     var localizedName: String {
         switch self {
         case .schedule: String(localized: "Jadwal Sholat")
+        case .quran:    String(localized: "Al-Quran")
         case .settings: String(localized: "Pengaturan")
         case .about:    String(localized: "Tentang")
         }
@@ -100,6 +103,7 @@ struct MainWindowView: View {
     private var detailView: some View {
         switch selection {
         case .schedule: ScheduleDetailView()
+        case .quran:    QuranView()
         case .settings: SettingsView()
         case .about:    AboutView()
         }

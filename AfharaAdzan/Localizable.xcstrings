@@ -33,6 +33,16 @@
         }
       }
     },
+    "%@ — %lld %@ — %@" : {
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ — %2$lld %3$@ — %4$@"
+          }
+        }
+      }
+    },
     "%@ • %@" : {
       "localizations" : {
         "id" : {
@@ -43,10 +53,13 @@
         }
       }
     },
-    "Afhara Adzan" : {
+    "%lld" : {
 
     },
-    "Akan memainkan adzan, lalu trigger doa banner + iqamah countdown setelah selesai." : {
+    "%lld ayat" : {
+
+    },
+    "Afhara Adzan" : {
 
     },
     "Aktifkan Iqamah Timer" : {
@@ -92,6 +105,9 @@
           }
         }
       }
+    },
+    "Al-Quran" : {
+
     },
     "Allāhumma Rabba hāżihid da'watit tāmmah, waṣ-ṣalātil qā'imah, āti Muḥammadanil wasīlata wal faḍīlah, wab'aṡhu maqāman maḥmūdanil lażī wa'adtah." : {
 
@@ -183,6 +199,9 @@
           }
         }
       }
+    },
+    "Ayat" : {
+
     },
     "Bahasa" : {
       "localizations" : {
@@ -315,6 +334,9 @@
           }
         }
       }
+    },
+    "Cari surah..." : {
+
     },
     "Countdown di Status Bar" : {
       "localizations" : {
@@ -1233,6 +1255,9 @@
         }
       }
     },
+    "Pilih surah untuk membaca" : {
+
+    },
     "Preview" : {
 
     },
@@ -1459,9 +1484,6 @@
           }
         }
       }
-    },
-    "Simulasi Adzan Sekarang" : {
-
     },
     "Sistem" : {
       "localizations" : {
@@ -1839,9 +1861,6 @@
           }
         }
       }
-    },
-    "Test Adzan" : {
-
     },
     "Umm al-Qura" : {
       "localizations" : {
