@@ -47,7 +47,6 @@ final class AppState {
     // Iqamah internals
     private var iqamahEndTime  : Date?
     private var iqamahPrayerName: String = ""
-    private var simulationIqamahSeconds: Int?  // override iqamah duration untuk simulasi
     private var currentAdzanPrayer: String = ""
 
     // Doa dismiss timer
@@ -161,14 +160,7 @@ final class AppState {
 
     private func startIqamahCountdown(for prayerName: String) {
         iqamahPrayerName = prayerName
-        let duration: Double
-        if let simSeconds = simulationIqamahSeconds {
-            duration = Double(simSeconds)
-            simulationIqamahSeconds = nil  // reset setelah dipakai
-        } else {
-            duration = Double(settings.iqamahDurationMinutes) * 60
-        }
-        iqamahEndTime = Date().addingTimeInterval(duration)
+        iqamahEndTime = Date().addingTimeInterval(Double(settings.iqamahDurationMinutes) * 60)
         updateIqamahCountdown()
     }
 
@@ -269,38 +261,6 @@ final class AppState {
         locationService.fetchOnce()
     }
 
-    // MARK: - Simulate (Debug)
-
-    #if DEBUG
-    func simulateAdzan() {
-        let simulatedPrayer = nextPrayer ?? prayerTimes.last(where: { $0.name.isFardhu })
-        let prayerName = simulatedPrayer?.name.localizedName ?? "Isya"
-        let timeString = simulatedPrayer?.timeString ?? Date().formatted(date: .omitted, time: .shortened)
-        currentAdzanPrayer = prayerName
-
-        // Override iqamah ke 10 detik buat testing
-        simulationIqamahSeconds = 10
-
-        // Step 1: Play adzan + notif (sama kayak real case)
-        Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                // Play suara adzan
-                if self.settings.isSoundEnabled {
-                    AudioService.shared.playAdzan(soundName: self.settings.selectedSound)
-                }
-                // Notif adzan
-                if self.settings.isNotificationEnabled {
-                    NotificationService.shared.sendAdzanNotification(for: prayerName, timeString: timeString)
-                }
-            }
-        }
-
-        // Step 2: onAdzanFinished callback (di init) otomatis trigger doa + iqamah
-        // Iqamah akan pakai simulationIqamahSeconds (10 detik) bukan settings (5 menit)
-    }
-    #endif
-
     // MARK: - Stop All
 
     func stopAll() {
@@ -312,7 +272,6 @@ final class AppState {
         dismissDoaBanner()
         iqamahState = .idle
         iqamahEndTime = nil
-        simulationIqamahSeconds = nil
     }
 
     // MARK: - Persistence
