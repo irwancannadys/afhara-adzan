@@ -586,6 +586,9 @@
         }
       }
     },
+    "Iqamah %@ Selesai" : {
+
+    },
     "ISNA" : {
       "localizations" : {
         "ar" : {
@@ -1388,6 +1391,7 @@
       }
     },
     "Saatnya iqamah %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1408,6 +1412,9 @@
           }
         }
       }
+    },
+    "Saatnya mendirikan sholat" : {
+
     },
     "Safar" : {
       "localizations" : {
@@ -1925,6 +1932,7 @@
       }
     },
     "Waktu Iqamah" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1945,6 +1953,9 @@
           }
         }
       }
+    },
+    "Waktu iqamah %@!" : {
+
     },
     "اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ" : {
 

@@ -36,7 +36,9 @@ struct MainWindowView: View {
         } detail: {
             detailView
                 .environment(appState)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .navigationSplitViewStyle(.balanced)
         .frame(minWidth: 640, minHeight: 460)
     }
 
@@ -185,6 +187,11 @@ private struct ScheduleDetailView: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 4, leading: 20, bottom: 4, trailing: 20))
                 }
+                if case .finished(let prayerName) = appState.iqamahState {
+                    IqamahFinishedRow(prayerName: prayerName, onDismiss: { appState.iqamahState = .idle })
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 20, bottom: 4, trailing: 20))
+                }
                 ForEach(fardhuPrayers) { prayer in
                     DesktopPrayerRow(prayer: prayer)
                         .listRowSeparator(.hidden)
@@ -193,6 +200,7 @@ private struct ScheduleDetailView: View {
             }
             .listStyle(.plain)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -224,6 +232,37 @@ private struct IqamahBannerRow: View {
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
         .background(Color.accentBackground(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+// MARK: - Iqamah Finished Row
+
+private struct IqamahFinishedRow: View {
+
+    let prayerName: String
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.title3)
+                .foregroundStyle(.green)
+            Text(String(localized: "Waktu iqamah \(prayerName)!"))
+                .font(.subheadline)
+                .fontWeight(.semibold)
+            Spacer()
+            Button {
+                onDismiss()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(Color.green.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }

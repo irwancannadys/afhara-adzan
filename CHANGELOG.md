@@ -4,6 +4,26 @@ All notable changes to Afhara Adzan are documented here.
 
 ---
 
+## [1.5.0]
+
+### Added
+- **Adzan notification** — system notification appears alongside adzan audio with prayer name and time (e.g. "Waktu Isya — 19:05")
+- **Iqamah finished notification** — system notification with wording "Iqamah [prayer] Selesai — Saatnya mendirikan sholat"
+- **Iqamah finished banner** — green banner in desktop dashboard when iqamah countdown reaches zero, with dismiss button
+- **Auto-remove notifications** — notifications automatically removed from Notification Center after 15 seconds
+- **Responsive desktop layout** — NavigationSplitView now properly fills detail column on external monitors
+
+### Fixed
+- **Duplicate notifications** — scheduled and instant notifications no longer fire simultaneously for the same prayer
+- **AudioService data race** — delegate callback now dispatches to main thread, preventing UI state corruption
+- **Stop Adzan continues flow** — pressing "Stop Adzan" now properly triggers doa and iqamah countdown instead of silently skipping them
+- **Fractional timezone support** — timezones like +5:30 (India) and +3:30 (Iran) now calculated correctly instead of being truncated
+- **Iqamah notification delivery** — changed from delayed trigger to immediate delivery for reliable notification display
+- **Stale simulation state** — simulation iqamah override properly cleaned up, no longer leaks into real prayer flow
+- **Race condition on stop** — `stopAll()` now resets all internal state to prevent restarted countdowns from async callbacks
+
+---
+
 ## [1.4.0]
 
 ### Added
