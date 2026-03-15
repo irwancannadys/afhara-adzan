@@ -35,10 +35,14 @@ final class AudioService: NSObject {
     }
 
     func stopAdzan() {
+        let wasPlaying = isPlaying
         player?.stop()
         player    = nil
         isPlaying = false
-        // Manual stop = TIDAK trigger onAdzanFinished
+        // Manual stop tetap trigger onAdzanFinished agar doa + iqamah tetap jalan
+        if wasPlaying {
+            onAdzanFinished?()
+        }
     }
 }
 
@@ -46,7 +50,10 @@ final class AudioService: NSObject {
 
 extension AudioService: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        isPlaying = false
-        onAdzanFinished?()
+        // Delegate bisa dipanggil dari background thread — dispatch ke main
+        DispatchQueue.main.async { [weak self] in
+            self?.isPlaying = false
+            self?.onAdzanFinished?()
+        }
     }
 }

@@ -59,6 +59,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
         // Agar notifikasi tetap muncul walau app di foreground
         UNUserNotificationCenter.current().delegate = self
+        NSLog("[AfharaAdzan] Notification delegate set: \(self)")
     }
 
     func userNotificationCenter(
@@ -66,7 +67,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        completionHandler([.banner, .sound])
+        let identifier = notification.request.identifier
+        NSLog("[AfharaAdzan] willPresent delegate called for: \(identifier)")
+        completionHandler([.banner, .sound, .list])
+
+        // Auto-remove dari Notification Center setelah 15 detik
+        DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
+            center.removeDeliveredNotifications(withIdentifiers: [identifier])
+        }
     }
 }
 

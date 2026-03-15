@@ -2,10 +2,12 @@ import Foundation
 import CoreLocation
 import Observation
 import ServiceManagement
+import UserNotifications
 
 enum IqamahState: Equatable {
     case idle
     case countdown(prayerName: String, remaining: Int)
+    case finished(prayerName: String)
 
     var isActive: Bool {
         if case .idle = self { return false }
@@ -45,6 +47,7 @@ final class AppState {
     // Iqamah internals
     private var iqamahEndTime  : Date?
     private var iqamahPrayerName: String = ""
+    private var simulationIqamahSeconds: Int?  // override iqamah duration untuk simulasi
     private var currentAdzanPrayer: String = ""
 
     // Doa dismiss timer
@@ -105,6 +108,18 @@ final class AppState {
                     guard let self, self.settings.isSoundEnabled else { return }
                     self.currentAdzanPrayer = prayer.name.localizedName
                     AudioService.shared.playAdzan(soundName: self.settings.selectedSound)
+
+                    // Cancel scheduled notif untuk prayer ini (hindari duplikat),
+                    // lalu kirim langsung
+                    if self.settings.isNotificationEnabled {
+                        UNUserNotificationCenter.current().removePendingNotificationRequests(
+                            withIdentifiers: ["prayer_\(prayer.name.rawValue)"]
+                        )
+                        NotificationService.shared.sendAdzanNotification(
+                            for: prayer.name.localizedName,
+                            timeString: prayer.timeString
+                        )
+                    }
                 }
             }
             audioTimers.append(timer)
@@ -115,8 +130,10 @@ final class AppState {
 
     private func handleAdzanFinished() {
         let prayerName = currentAdzanPrayer
+        guard !prayerName.isEmpty else { return }
 
         // Doa setelah adzan — tampil selama (iqamah duration - 10 detik)
+        // dismissDoaBanner() di updateIqamahCountdown akan dismiss saat iqamah selesai
         if settings.showDuaAfterAdzan {
             showDoaBanner = true
             doaDismissTimer?.invalidate()
@@ -144,7 +161,14 @@ final class AppState {
 
     private func startIqamahCountdown(for prayerName: String) {
         iqamahPrayerName = prayerName
-        iqamahEndTime = Date().addingTimeInterval(Double(settings.iqamahDurationMinutes) * 60)
+        let duration: Double
+        if let simSeconds = simulationIqamahSeconds {
+            duration = Double(simSeconds)
+            simulationIqamahSeconds = nil  // reset setelah dipakai
+        } else {
+            duration = Double(settings.iqamahDurationMinutes) * 60
+        }
+        iqamahEndTime = Date().addingTimeInterval(duration)
         updateIqamahCountdown()
     }
 
@@ -156,8 +180,10 @@ final class AppState {
 
         let remaining = Int(endTime.timeIntervalSinceNow)
         if remaining <= 0 {
-            iqamahState = .idle
+            NSLog("[AfharaAdzan] Iqamah countdown finished for: \(iqamahPrayerName)")
+            iqamahState = .finished(prayerName: iqamahPrayerName)
             iqamahEndTime = nil
+            dismissDoaBanner()
             NotificationService.shared.sendIqamahNotification(for: iqamahPrayerName)
             return
         }
@@ -222,7 +248,7 @@ final class AppState {
                 guard let loc = self.locationService.currentLocation,
                       !self.locationService.cityName.isEmpty else { return }
 
-                let tz = Double(TimeZone.current.secondsFromGMT() / 3600)
+                let tz = Double(TimeZone.current.secondsFromGMT()) / 3600.0
                 let newLocation = LocationModel(
                     latitude : loc.coordinate.latitude,
                     longitude: loc.coordinate.longitude,
@@ -247,14 +273,31 @@ final class AppState {
 
     #if DEBUG
     func simulateAdzan() {
-        let prayerName = nextPrayer?.name.localizedName ?? "Test"
+        let simulatedPrayer = nextPrayer ?? prayerTimes.last(where: { $0.name.isFardhu })
+        let prayerName = simulatedPrayer?.name.localizedName ?? "Isya"
+        let timeString = simulatedPrayer?.timeString ?? Date().formatted(date: .omitted, time: .shortened)
         currentAdzanPrayer = prayerName
-        // Skip adzan MP3, langsung trigger setelah 3 detik
-        Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { [weak self] _ in
+
+        // Override iqamah ke 10 detik buat testing
+        simulationIqamahSeconds = 10
+
+        // Step 1: Play adzan + notif (sama kayak real case)
+        Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
             Task { @MainActor [weak self] in
-                self?.handleAdzanFinished()
+                guard let self else { return }
+                // Play suara adzan
+                if self.settings.isSoundEnabled {
+                    AudioService.shared.playAdzan(soundName: self.settings.selectedSound)
+                }
+                // Notif adzan
+                if self.settings.isNotificationEnabled {
+                    NotificationService.shared.sendAdzanNotification(for: prayerName, timeString: timeString)
+                }
             }
         }
+
+        // Step 2: onAdzanFinished callback (di init) otomatis trigger doa + iqamah
+        // Iqamah akan pakai simulationIqamahSeconds (10 detik) bukan settings (5 menit)
     }
     #endif
 
@@ -264,10 +307,12 @@ final class AppState {
         NotificationService.shared.cancelAll()
         AudioService.shared.stopAdzan()
 
-        // Cleanup doa & iqamah state
+        // Cleanup semua state
+        currentAdzanPrayer = ""
         dismissDoaBanner()
         iqamahState = .idle
         iqamahEndTime = nil
+        simulationIqamahSeconds = nil
     }
 
     // MARK: - Persistence

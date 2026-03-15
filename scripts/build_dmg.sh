@@ -4,7 +4,7 @@ set -e
 PROJECT="AfharaAdzan.xcodeproj"
 SCHEME="AfharaAdzan"
 BUILD_DIR="build"
-DMG_NAME="AfharaAdzan-v1.3.0.dmg"
+DMG_NAME="AfharaAdzan-v1.5.0.dmg"
 
 echo "==> Building..."
 xcodebuild \
