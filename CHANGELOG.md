@@ -19,7 +19,6 @@ All notable changes to Afhara Adzan are documented here.
 - **Stop Adzan continues flow** — pressing "Stop Adzan" now properly triggers doa and iqamah countdown instead of silently skipping them
 - **Fractional timezone support** — timezones like +5:30 (India) and +3:30 (Iran) now calculated correctly instead of being truncated
 - **Iqamah notification delivery** — changed from delayed trigger to immediate delivery for reliable notification display
-- **Stale simulation state** — simulation iqamah override properly cleaned up, no longer leaks into real prayer flow
 - **Race condition on stop** — `stopAll()` now resets all internal state to prevent restarted countdowns from async callbacks
 
 ---
@@ -33,7 +32,6 @@ All notable changes to Afhara Adzan are documented here.
 - **Per-prayer mute for adzan sound** — individually mute adzan audio per prayer (separate from notification toggle)
 - **Foreground notification support** — macOS notifications now display even when the app is in the foreground via `UNUserNotificationCenterDelegate`
 - **Iqamah notification** — system notification fires when iqamah countdown reaches zero
-- **Simulate adzan button** — debug-only button in Settings to test the full adzan → doa → iqamah flow without waiting for prayer time
 - **Multi-language support** — language selector (Indonesian / English) with restart prompt
 - **Unit tests** — 51 tests covering madhab calculation, notification scheduling, iqamah state machine, and end-to-end simulation
 
