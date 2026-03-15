@@ -128,21 +128,6 @@ struct SettingsView: View {
                 .disabled(!settings.iqamahEnabled)
             }
 
-            #if DEBUG
-            // MARK: Test Adzan (Debug Only)
-            Section("Test Adzan") {
-                Button {
-                    appState.simulateAdzan()
-                } label: {
-                    Label(String(localized: "Simulasi Adzan Sekarang"), systemImage: "play.circle.fill")
-                }
-
-                Text(String(localized: "Akan memainkan adzan, lalu trigger doa banner + iqamah countdown setelah selesai."))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            #endif
-
             // MARK: Lokasi
             Section(String(localized: "Lokasi")) {
                 Toggle(String(localized: "Lokasi Otomatis (GPS)"), isOn: $settings.useAutoLocation)
