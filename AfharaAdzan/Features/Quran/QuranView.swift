@@ -7,6 +7,7 @@ struct QuranView: View {
     @State private var selectedSurahId: Int?
     @State private var searchText = ""
     @State private var showBookmarks = false
+    @State private var scrollToAyah: Int?
 
     private let quranService = QuranService.shared
 
@@ -29,16 +30,22 @@ struct QuranView: View {
 
             // Right: Bookmark list or Ayah detail
             if showBookmarks {
-                BookmarkListView { surahId in
+                BookmarkListView { surahId, numberInSurah in
+                    // Reset first so onChange fires even for the same surah
+                    scrollToAyah = nil
                     selectedSurahId = surahId
                     showBookmarks = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        scrollToAyah = numberInSurah
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let surahId = selectedSurahId,
                let surah = quranService.surah(byId: surahId) {
                 AyahDetailView(
                     surah: surah,
-                    arabicFontSize: $appState.settings.quranArabicFontSize
+                    arabicFontSize: $appState.settings.quranArabicFontSize,
+                    scrollToAyah: $scrollToAyah
                 )
                 .id(surahId)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -58,10 +65,16 @@ struct QuranView: View {
                             Text("\(appState.settings.quranBookmarks.count)")
                                 .font(.system(size: 9, weight: .bold))
                                 .foregroundStyle(.white)
+                                .id("badge_\(appState.settings.quranBookmarks.count)")
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: .bottom).combined(with: .opacity),
+                                    removal: .move(edge: .top).combined(with: .opacity)
+                                ))
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 1)
                                 .background(Capsule().fill(Color.accent(for: colorScheme)))
                                 .offset(x: 8, y: -6)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: appState.settings.quranBookmarks.count)
                         }
                     }
                 }

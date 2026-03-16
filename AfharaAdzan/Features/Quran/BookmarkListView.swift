@@ -5,7 +5,7 @@ struct BookmarkListView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.colorScheme) private var colorScheme
 
-    var onSelectAyah: (_ surahId: Int) -> Void
+    var onSelectAyah: (_ surahId: Int, _ numberInSurah: Int) -> Void
 
     private let quranService = QuranService.shared
 
@@ -53,13 +53,19 @@ struct BookmarkListView: View {
                                 surah: item.surah,
                                 ayah: item.ayah,
                                 appLanguage: appState.settings.appLanguage,
-                                onTap: { onSelectAyah(item.surah.id) },
+                                onTap: { onSelectAyah(item.surah.id, item.ayah.numberInSurah) },
                                 onRemove: {
                                     let key = "\(item.ayah.surahId)_\(item.ayah.numberInSurah)"
-                                    appState.settings.quranBookmarks.removeAll { $0 == key }
+                                    withAnimation(.easeInOut(duration: 0.25)) {
+                                        appState.settings.quranBookmarks.removeAll { $0 == key }
+                                    }
                                     appState.saveSettings()
                                 }
                             )
+                            .transition(.asymmetric(
+                                insertion: .identity,
+                                removal: .move(edge: .trailing).combined(with: .opacity)
+                            ))
                         }
                     }
                     .padding(20)
@@ -112,7 +118,7 @@ private struct BookmarkRow: View {
             HStack {
                 Text("\(surah.name) : \(ayah.numberInSurah)")
                     .font(.caption)
-                    .fontWeight(.semibold)
+                    .fontWeight(.bold)
                     .foregroundStyle(.secondary)
                 Text("(\(localizedSurahName))")
                     .font(.caption2)
