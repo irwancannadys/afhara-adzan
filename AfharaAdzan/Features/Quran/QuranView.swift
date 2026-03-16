@@ -89,7 +89,7 @@ struct QuranView: View {
         }
         .onChange(of: selectedSurahId) { _, newValue in
             appState.settings.quranLastSurahId = newValue
-            appState.saveSettingsQuiet()
+            appState.saveSettings()
         }
     }
 
