@@ -5,8 +5,10 @@ struct AyahDetailView: View {
 
     let surah: Surah
     @Binding var arabicFontSize: Double
+    @Binding var scrollToAyah: Int?
 
     @Environment(AppState.self) private var appState
+    @State private var highlightedAyah: Int?
 
     private var showBismillah: Bool {
         surah.id != 1 && surah.id != 9
@@ -55,21 +57,55 @@ struct AyahDetailView: View {
             Divider()
 
             // Ayat list
-            ScrollView {
-                LazyVStack(spacing: 16) {
-                    // Bismillah separator
-                    if showBismillah {
-                        Text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")
-                            .font(.system(size: 20))
-                            .foregroundStyle(.black.opacity(0.85))
-                            .frame(maxWidth: .infinity)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        // Bismillah separator
+                        if showBismillah {
+                            Text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")
+                                .font(.system(size: 20))
+                                .foregroundStyle(.black.opacity(0.85))
+                                .frame(maxWidth: .infinity)
+                        }
+                        ForEach(surah.ayahs) { ayah in
+                            AyahRow(
+                                ayah: ayah,
+                                arabicFontSize: arabicFontSize,
+                                isHighlighted: highlightedAyah == ayah.numberInSurah
+                            )
+                            .id(ayah.numberInSurah)
+                        }
                     }
-                    ForEach(surah.ayahs) { ayah in
-                        AyahRow(ayah: ayah, arabicFontSize: arabicFontSize)
+                    .padding(20)
+                }
+                .onAppear {
+                    scrollToTarget(proxy: proxy)
+                }
+                .onChange(of: scrollToAyah) {
+                    scrollToTarget(proxy: proxy)
+                }
+            }
+        }
+    }
+
+    private func scrollToTarget(proxy: ScrollViewProxy) {
+        guard let target = scrollToAyah else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.easeInOut(duration: 0.4)) {
+                proxy.scrollTo(target, anchor: .top)
+            }
+            // Flash highlight on the target ayah
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                withAnimation(.easeIn(duration: 0.2)) {
+                    highlightedAyah = target
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        highlightedAyah = nil
                     }
                 }
-                .padding(20)
             }
+            scrollToAyah = nil
         }
     }
 }
@@ -83,8 +119,10 @@ private struct AyahRow: View {
 
     let ayah: Ayah
     let arabicFontSize: Double
+    var isHighlighted: Bool = false
 
     @State private var showCopied = false
+    @State private var starScale: CGFloat = 1.0
 
     private var bookmarkKey: String {
         "\(ayah.surahId)_\(ayah.numberInSurah)"
@@ -106,16 +144,28 @@ private struct AyahRow: View {
                     .background(Circle().strokeBorder(.quaternary))
                 Spacer()
                 Button {
-                    if let index = appState.settings.quranBookmarks.firstIndex(of: bookmarkKey) {
-                        appState.settings.quranBookmarks.remove(at: index)
-                    } else {
-                        appState.settings.quranBookmarks.insert(bookmarkKey, at: 0)
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        if let index = appState.settings.quranBookmarks.firstIndex(of: bookmarkKey) {
+                            appState.settings.quranBookmarks.remove(at: index)
+                        } else {
+                            appState.settings.quranBookmarks.insert(bookmarkKey, at: 0)
+                        }
                     }
                     appState.saveSettings()
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.4)) {
+                        starScale = 1.8
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.4)) {
+                            starScale = 1.0
+                        }
+                    }
                 } label: {
                     Image(systemName: isBookmarked ? "star.fill" : "star")
                         .font(.caption)
                         .foregroundStyle(isBookmarked ? .yellow : .secondary)
+                        .scaleEffect(starScale)
+                        .animation(.easeInOut(duration: 0.2), value: isBookmarked)
                 }
                 .buttonStyle(.plain)
                 .help(String(localized: "Bookmark ayat"))
@@ -163,6 +213,11 @@ private struct AyahRow: View {
         }
         .padding(12)
         .background(Color.accentBackground(for: colorScheme).opacity(0.5))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.accent(for: colorScheme), lineWidth: isHighlighted ? 2 : 0)
+                .opacity(isHighlighted ? 1 : 0)
+        )
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
