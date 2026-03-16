@@ -59,7 +59,7 @@ struct BookmarkListView: View {
                                     withAnimation(.easeInOut(duration: 0.25)) {
                                         appState.settings.quranBookmarks.removeAll { $0 == key }
                                     }
-                                    appState.saveSettings()
+                                    appState.saveSettingsQuiet()
                                 }
                             )
                             .transition(.asymmetric(

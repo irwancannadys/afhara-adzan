@@ -43,7 +43,7 @@ struct AyahDetailView: View {
                     Slider(value: $arabicFontSize, in: 18...40, step: 1)
                         .frame(width: 120)
                         .onChange(of: arabicFontSize) {
-                            appState.saveSettings()
+                            appState.saveSettingsQuiet()
                         }
                     Image(systemName: "textformat.size.larger")
                         .font(.caption2)
@@ -68,10 +68,22 @@ struct AyahDetailView: View {
                                 .frame(maxWidth: .infinity)
                         }
                         ForEach(surah.ayahs) { ayah in
+                            let key = "\(ayah.surahId)_\(ayah.numberInSurah)"
                             AyahRow(
                                 ayah: ayah,
                                 arabicFontSize: arabicFontSize,
-                                isHighlighted: highlightedAyah == ayah.numberInSurah
+                                isHighlighted: highlightedAyah == ayah.numberInSurah,
+                                isBookmarked: appState.settings.quranBookmarks.contains(key),
+                                onToggleBookmark: {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        if let index = appState.settings.quranBookmarks.firstIndex(of: key) {
+                                            appState.settings.quranBookmarks.remove(at: index)
+                                        } else {
+                                            appState.settings.quranBookmarks.insert(key, at: 0)
+                                        }
+                                    }
+                                    appState.saveSettingsQuiet()
+                                }
                             )
                             .id(ayah.numberInSurah)
                         }
@@ -115,22 +127,15 @@ struct AyahDetailView: View {
 private struct AyahRow: View {
 
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(AppState.self) private var appState
 
     let ayah: Ayah
     let arabicFontSize: Double
     var isHighlighted: Bool = false
+    var isBookmarked: Bool = false
+    var onToggleBookmark: () -> Void = {}
 
     @State private var showCopied = false
     @State private var starScale: CGFloat = 1.0
-
-    private var bookmarkKey: String {
-        "\(ayah.surahId)_\(ayah.numberInSurah)"
-    }
-
-    private var isBookmarked: Bool {
-        appState.settings.quranBookmarks.contains(bookmarkKey)
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -144,14 +149,7 @@ private struct AyahRow: View {
                     .background(Circle().strokeBorder(.quaternary))
                 Spacer()
                 Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        if let index = appState.settings.quranBookmarks.firstIndex(of: bookmarkKey) {
-                            appState.settings.quranBookmarks.remove(at: index)
-                        } else {
-                            appState.settings.quranBookmarks.insert(bookmarkKey, at: 0)
-                        }
-                    }
-                    appState.saveSettings()
+                    onToggleBookmark()
                     withAnimation(.spring(response: 0.25, dampingFraction: 0.4)) {
                         starScale = 1.8
                     }
