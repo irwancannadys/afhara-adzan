@@ -52,6 +52,9 @@ final class AppState {
     // Doa dismiss timer
     private var doaDismissTimer: Timer?
 
+    // Debounce timer untuk saveSettings
+    private var saveDebounceTimer: Timer?
+
     // MARK: - Init
 
     init() {
@@ -233,8 +236,16 @@ final class AppState {
         guard settings.useAutoLocation else { return }
         locationService.requestPermission()
 
+        var attempts = 0
+        let maxAttempts = 60  // 30 detik (60 × 0.5s)
+
         Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
             guard let self else { timer.invalidate(); return }
+            attempts += 1
+            if attempts >= maxAttempts {
+                timer.invalidate()
+                return
+            }
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 guard let loc = self.locationService.currentLocation,
@@ -276,7 +287,35 @@ final class AppState {
 
     // MARK: - Persistence
 
+    /// Save ringan — hanya persist ke disk, TANPA refresh prayer times.
+    /// Cocok untuk perubahan Quran (font size, bookmark, last surah) yang tidak
+    /// mempengaruhi jadwal sholat.
+    func saveSettingsQuiet() {
+        if let data = try? JSONEncoder().encode(settings) {
+            UserDefaults.standard.set(data, forKey: "prayer_settings")
+        }
+    }
+
+    /// Save langsung tanpa debounce — untuk kasus yang butuh persist segera
+    /// (misal sebelum app restart/terminate).
+    func saveSettingsImmediately() {
+        saveDebounceTimer?.invalidate()
+        commitSaveSettings()
+    }
+
+    /// Save dengan debounce 0.5 detik — coalesce rapid calls (slider drag, keystroke, dll).
+    /// Setelah debounce selesai: persist ke disk + refresh prayer times + reschedule notifikasi.
     func saveSettings() {
+        saveDebounceTimer?.invalidate()
+        saveDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.commitSaveSettings()
+            }
+        }
+    }
+
+    /// Eksekusi save yang sebenarnya — dipanggil setelah debounce selesai.
+    private func commitSaveSettings() {
         if let data = try? JSONEncoder().encode(settings) {
             UserDefaults.standard.set(data, forKey: "prayer_settings")
         }

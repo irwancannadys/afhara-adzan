@@ -105,14 +105,23 @@ struct MainWindowView: View {
     }
 
     // MARK: - Detail
+    // ZStack + opacity approach: view tetap alive di memory,
+    // tidak di-destroy/recreate tiap pindah menu → eliminasi lag saat switch.
 
-    @ViewBuilder
     private var detailView: some View {
-        switch selection {
-        case .schedule: ScheduleDetailView()
-        case .quran:    QuranView()
-        case .settings: SettingsView()
-        case .about:    AboutView()
+        ZStack {
+            ScheduleDetailView()
+                .opacity(selection == .schedule ? 1 : 0)
+                .allowsHitTesting(selection == .schedule)
+            QuranView()
+                .opacity(selection == .quran ? 1 : 0)
+                .allowsHitTesting(selection == .quran)
+            SettingsView()
+                .opacity(selection == .settings ? 1 : 0)
+                .allowsHitTesting(selection == .settings)
+            AboutView()
+                .opacity(selection == .about ? 1 : 0)
+                .allowsHitTesting(selection == .about)
         }
     }
 }
@@ -124,10 +133,22 @@ private struct ScheduleDetailView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.colorScheme) private var colorScheme
 
+    @State private var islamicDate: String = ""
+    @State private var gregorianDate: String = ""
+    @State private var cachedDay: Int = 0
+
     private var fardhuPrayers: [PrayerTime] {
         appState.prayerTimes.filter {
             $0.name.isFardhu || ($0.name == .sunrise && appState.settings.showSyuruq)
         }
+    }
+
+    private func refreshDateStrings() {
+        let today = Calendar.current.component(.day, from: Date())
+        guard today != cachedDay else { return }
+        cachedDay = today
+        islamicDate = IslamicCalendarHelper.islamicDateString()
+        gregorianDate = Date().formatted(.dateTime.weekday(.wide).day().month(.wide).year())
     }
 
     var body: some View {
@@ -139,7 +160,7 @@ private struct ScheduleDetailView: View {
                     Text(String(localized: "Tanggal Hijriah"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(IslamicCalendarHelper.islamicDateString())
+                    Text(islamicDate)
                         .font(.title3)
                         .fontWeight(.semibold)
                 }
@@ -150,7 +171,7 @@ private struct ScheduleDetailView: View {
                     Text(String(localized: "Tanggal Masehi"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide).year()))
+                    Text(gregorianDate)
                         .font(.title3)
                         .fontWeight(.semibold)
                 }
@@ -212,6 +233,8 @@ private struct ScheduleDetailView: View {
             .listStyle(.plain)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear { refreshDateStrings() }
+        .onChange(of: appState.prayerTimes) { refreshDateStrings() }
     }
 }
 
