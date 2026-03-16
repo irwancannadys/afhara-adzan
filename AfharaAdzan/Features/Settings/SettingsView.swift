@@ -176,10 +176,11 @@ struct SettingsView: View {
                     // Save settings dulu, lalu restart
                     appState.settings = settings
                     appState.saveSettings()
+                    let bundlePath = Bundle.main.bundlePath
                     let task = Process()
-                    task.launchPath = "/usr/bin/open"
-                    task.arguments = ["-n", Bundle.main.bundlePath]
-                    task.launch()
+                    task.launchPath = "/bin/sh"
+                    task.arguments = ["-c", "sleep 1 && open \"\(bundlePath)\""]
+                    try? task.run()
                     NSApplication.shared.terminate(nil)
                 }
                 Button(String(localized: "Nanti"), role: .cancel) { }

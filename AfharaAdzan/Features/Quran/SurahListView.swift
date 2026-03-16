@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SurahListView: View {
 
+    @Environment(AppState.self) private var appState
     let surahs: [Surah]
     @Binding var selectedSurahId: Int?
     @Binding var searchText: String
@@ -12,7 +13,7 @@ struct SurahListView: View {
 
     var body: some View {
         List(filteredSurahs) { surah in
-            SurahRow(surah: surah, isSelected: selectedSurahId == surah.id)
+            SurahRow(surah: surah, isSelected: selectedSurahId == surah.id, appLanguage: appState.settings.appLanguage)
                 .contentShape(Rectangle())
                 .onTapGesture { selectedSurahId = surah.id }
                 .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
@@ -34,6 +35,15 @@ private struct SurahRow: View {
 
     let surah: Surah
     let isSelected: Bool
+    let appLanguage: AppLanguage
+
+    private var localizedMeaning: String {
+        switch appLanguage {
+        case .id: surah.indonesianName
+        case .en: surah.englishName
+        case .ar: surah.englishName
+        }
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -50,7 +60,7 @@ private struct SurahRow: View {
                 Text(surah.name)
                     .font(.body)
                     .fontWeight(.medium)
-                Text(surah.englishName)
+                Text(localizedMeaning)
                     .font(.caption)
                     .foregroundStyle(isSelected ? .white.opacity(0.7) : .secondary)
             }
