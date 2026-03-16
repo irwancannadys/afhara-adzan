@@ -71,12 +71,19 @@ struct MainWindowView: View {
             Divider()
 
             // Nav items
-            List(MainNavItem.allCases, selection: $selection) { item in
-                Label(item.localizedName, systemImage: item.icon)
-                    .tag(item)
+            VStack(spacing: 4) {
+                ForEach(MainNavItem.allCases) { item in
+                    SidebarNavRow(
+                        item: item,
+                        isSelected: selection == item,
+                        colorScheme: colorScheme
+                    ) {
+                        selection = item
+                    }
+                }
             }
-            .listStyle(.sidebar)
-            .padding(.top, 8)
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
 
             Spacer(minLength: 0)
 
@@ -376,5 +383,29 @@ private struct AboutView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle(String(localized: "Tentang"))
+    }
+}
+
+// MARK: - Sidebar Nav Row
+
+private struct SidebarNavRow: View {
+
+    let item: MainNavItem
+    let isSelected: Bool
+    let colorScheme: ColorScheme
+    let action: () -> Void
+
+    var body: some View {
+        Label(item.localizedName, systemImage: item.icon)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 8)
+            .foregroundStyle(isSelected ? .white : Color.primary.opacity(0.85))
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(isSelected ? Color.accent(for: colorScheme) : .clear)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 6))
+            .onTapGesture(perform: action)
     }
 }
