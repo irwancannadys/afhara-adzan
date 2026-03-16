@@ -8,7 +8,12 @@ struct SettingsView: View {
     @State private var showRestartAlert: Bool = false
     @State private var showMadhabAlert: Bool = false
     @State private var didAppear: Bool = false
-    @State private var availableSounds: [String] = []
+
+    private var availableSounds: [String] {
+        Bundle.main.paths(forResourcesOfType: "mp3", inDirectory: nil)
+            .map { URL(fileURLWithPath: $0).deletingPathExtension().lastPathComponent }
+            .sorted()
+    }
 
     private var fardhuPrayerNames: [PrayerName] {
         PrayerName.allCases.filter { $0.isFardhu }
@@ -168,9 +173,9 @@ struct SettingsView: View {
             }
             .alert(String(localized: "Restart Aplikasi"), isPresented: $showRestartAlert) {
                 Button(String(localized: "Restart Sekarang")) {
-                    // Save langsung tanpa debounce — app akan terminate setelah ini
+                    // Save settings dulu, lalu restart
                     appState.settings = settings
-                    appState.saveSettingsImmediately()
+                    appState.saveSettings()
                     let bundlePath = Bundle.main.bundlePath
                     let task = Process()
                     task.launchPath = "/bin/sh"
@@ -224,18 +229,13 @@ struct SettingsView: View {
 
         }
         .formStyle(.grouped)
+        .navigationTitle(String(localized: "Pengaturan"))
         .onAppear {
             settings   = appState.settings
             manualCity = appState.location.cityName
-            if availableSounds.isEmpty {
-                availableSounds = Bundle.main.paths(forResourcesOfType: "mp3", inDirectory: nil)
-                    .map { URL(fileURLWithPath: $0).deletingPathExtension().lastPathComponent }
-                    .sorted()
-            }
             DispatchQueue.main.async { didAppear = true }
         }
         .onChange(of: settings) { _, newVal in
-            guard didAppear else { return }
             appState.settings = newVal
             appState.saveSettings()
         }

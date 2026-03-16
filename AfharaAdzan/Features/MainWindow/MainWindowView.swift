@@ -106,22 +106,14 @@ struct MainWindowView: View {
 
     // MARK: - Detail
 
+    @ViewBuilder
     private var detailView: some View {
-        ZStack {
-            ScheduleDetailView()
-                .opacity(selection == .schedule ? 1 : 0)
-                .allowsHitTesting(selection == .schedule)
-            QuranView()
-                .opacity(selection == .quran ? 1 : 0)
-                .allowsHitTesting(selection == .quran)
-            SettingsView()
-                .opacity(selection == .settings ? 1 : 0)
-                .allowsHitTesting(selection == .settings)
-            AboutView()
-                .opacity(selection == .about ? 1 : 0)
-                .allowsHitTesting(selection == .about)
+        switch selection {
+        case .schedule: ScheduleDetailView()
+        case .quran:    QuranView()
+        case .settings: SettingsView()
+        case .about:    AboutView()
         }
-        .navigationTitle(selection.localizedName)
     }
 }
 
@@ -131,18 +123,6 @@ private struct ScheduleDetailView: View {
 
     @Environment(AppState.self) private var appState
     @Environment(\.colorScheme) private var colorScheme
-
-    @State private var islamicDate: String = ""
-    @State private var gregorianDate: String = ""
-    @State private var cachedDay: Int = 0
-
-    private func refreshDateStrings() {
-        let today = Calendar.current.component(.day, from: Date())
-        guard today != cachedDay else { return }
-        cachedDay = today
-        islamicDate = IslamicCalendarHelper.islamicDateString()
-        gregorianDate = Date().formatted(.dateTime.weekday(.wide).day().month(.wide).year())
-    }
 
     private var fardhuPrayers: [PrayerTime] {
         appState.prayerTimes.filter {
@@ -159,7 +139,7 @@ private struct ScheduleDetailView: View {
                     Text(String(localized: "Tanggal Hijriah"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(islamicDate)
+                    Text(IslamicCalendarHelper.islamicDateString())
                         .font(.title3)
                         .fontWeight(.semibold)
                 }
@@ -170,7 +150,7 @@ private struct ScheduleDetailView: View {
                     Text(String(localized: "Tanggal Masehi"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(gregorianDate)
+                    Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide).year()))
                         .font(.title3)
                         .fontWeight(.semibold)
                 }
@@ -232,8 +212,6 @@ private struct ScheduleDetailView: View {
             .listStyle(.plain)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear { refreshDateStrings() }
-        .onChange(of: appState.prayerTimes) { refreshDateStrings() }
     }
 }
 
@@ -404,6 +382,7 @@ private struct AboutView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationTitle(String(localized: "Tentang"))
     }
 }
 
