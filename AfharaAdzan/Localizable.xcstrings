@@ -23,6 +23,9 @@
         }
       }
     },
+    "(%@)" : {
+
+    },
     "%@  %@" : {
       "localizations" : {
         "id" : {
@@ -39,6 +42,16 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ — %2$lld %3$@ — %4$@"
+          }
+        }
+      }
+    },
+    "%@ : %lld" : {
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ : %2$lld"
           }
         }
       }
@@ -203,6 +216,28 @@
     "Ayat" : {
 
     },
+    "Ayat Tersimpan" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الآيات المحفوظة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved Verses"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayat Tersimpan"
+          }
+        }
+      }
+    },
     "Bahasa" : {
       "localizations" : {
         "ar" : {
@@ -269,6 +304,28 @@
         }
       }
     },
+    "Belum ada ayat tersimpan" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد آيات محفوظة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No saved verses yet"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belum ada ayat tersimpan"
+          }
+        }
+      }
+    },
     "Berikutnya" : {
       "localizations" : {
         "ar" : {
@@ -287,6 +344,31 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Berikutnya"
+          }
+        }
+      }
+    },
+    "Bookmark (%lld)" : {
+
+    },
+    "Bookmark ayat" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حفظ الآية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bookmark verse"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bookmark ayat"
           }
         }
       }
@@ -558,6 +640,28 @@
         }
       }
     },
+    "Hapus bookmark" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة الإشارة المرجعية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove bookmark"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hapus bookmark"
+          }
+        }
+      }
+    },
     "Hijriah" : {
       "localizations" : {
         "ar" : {
@@ -780,6 +884,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kemenag RI"
+          }
+        }
+      }
+    },
+    "Ketuk bintang pada ayat untuk menyimpan" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغط على النجمة لحفظ الآية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the star on a verse to save it"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ketuk bintang pada ayat untuk menyimpan"
           }
         }
       }
