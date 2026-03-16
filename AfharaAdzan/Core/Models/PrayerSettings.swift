@@ -96,6 +96,7 @@ struct PrayerSettings: Codable, Equatable {
     var appLanguage          : AppLanguage             = AppLanguage.systemDefault
     var quranLastSurahId     : Int?                    = nil
     var quranArabicFontSize  : Double                  = 26
+    var quranBookmarks       : [String]                  = []
 
     // Custom decoder agar field baru tidak merusak data lama di UserDefaults.
     // Swift synthesized Codable akan throw jika key tidak ada — decodeIfPresent + default value mencegah itu.
@@ -120,6 +121,7 @@ struct PrayerSettings: Codable, Equatable {
         appLanguage           = try c.decodeIfPresent(AppLanguage.self,           forKey: .appLanguage)           ?? AppLanguage.systemDefault
         quranLastSurahId      = try c.decodeIfPresent(Int.self,                   forKey: .quranLastSurahId)
         quranArabicFontSize   = try c.decodeIfPresent(Double.self,                forKey: .quranArabicFontSize)   ?? 26
+        quranBookmarks        = try c.decodeIfPresent([String].self,              forKey: .quranBookmarks)        ?? []
     }
 
     init() {}

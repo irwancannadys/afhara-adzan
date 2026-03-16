@@ -6,6 +6,8 @@ struct SurahListView: View {
     let surahs: [Surah]
     @Binding var selectedSurahId: Int?
     @Binding var searchText: String
+    var showBookmarks: Bool = false
+    var onSelectSurah: ((_ surahId: Int) -> Void)?
 
     private var filteredSurahs: [Surah] {
         QuranService.shared.search(query: searchText)
@@ -13,9 +15,12 @@ struct SurahListView: View {
 
     var body: some View {
         List(filteredSurahs) { surah in
-            SurahRow(surah: surah, isSelected: selectedSurahId == surah.id, appLanguage: appState.settings.appLanguage)
+            SurahRow(surah: surah, isSelected: selectedSurahId == surah.id && !showBookmarks, appLanguage: appState.settings.appLanguage)
                 .contentShape(Rectangle())
-                .onTapGesture { selectedSurahId = surah.id }
+                .onTapGesture {
+                    selectedSurahId = surah.id
+                    onSelectSurah?(surah.id)
+                }
                 .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
         }
         .listStyle(.inset)

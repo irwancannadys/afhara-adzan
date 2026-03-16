@@ -79,15 +79,24 @@ struct AyahDetailView: View {
 private struct AyahRow: View {
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(AppState.self) private var appState
 
     let ayah: Ayah
     let arabicFontSize: Double
 
     @State private var showCopied = false
 
+    private var bookmarkKey: String {
+        "\(ayah.surahId)_\(ayah.numberInSurah)"
+    }
+
+    private var isBookmarked: Bool {
+        appState.settings.quranBookmarks.contains(bookmarkKey)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Ayah number badge + copy button
+            // Ayah number badge + bookmark + copy button
             HStack {
                 Text("\(ayah.numberInSurah)")
                     .font(.caption)
@@ -96,6 +105,20 @@ private struct AyahRow: View {
                     .frame(width: 28, height: 28)
                     .background(Circle().strokeBorder(.quaternary))
                 Spacer()
+                Button {
+                    if let index = appState.settings.quranBookmarks.firstIndex(of: bookmarkKey) {
+                        appState.settings.quranBookmarks.remove(at: index)
+                    } else {
+                        appState.settings.quranBookmarks.insert(bookmarkKey, at: 0)
+                    }
+                    appState.saveSettings()
+                } label: {
+                    Image(systemName: isBookmarked ? "star.fill" : "star")
+                        .font(.caption)
+                        .foregroundStyle(isBookmarked ? .yellow : .secondary)
+                }
+                .buttonStyle(.plain)
+                .help(String(localized: "Bookmark ayat"))
                 Button {
                     let text = """
                     \(ayah.arabicText)
