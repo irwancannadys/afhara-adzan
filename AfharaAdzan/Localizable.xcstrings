@@ -336,7 +336,26 @@
       }
     },
     "Cari surah..." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابحث عن سورة..."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search surah..."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cari surah..."
+          }
+        }
+      }
     },
     "Countdown di Status Bar" : {
       "localizations" : {
@@ -1256,7 +1275,26 @@
       }
     },
     "Pilih surah untuk membaca" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختر سورة للقراءة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select a surah to read"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih surah untuk membaca"
+          }
+        }
+      }
     },
     "Preview" : {
 
@@ -1459,6 +1497,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Safar"
+          }
+        }
+      }
+    },
+    "Salin ayat" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسخ الآية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy verse"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salin ayat"
           }
         }
       }
@@ -1977,6 +2037,9 @@
 
     },
     "اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ" : {
+
+    },
+    "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" : {
 
     }
   },

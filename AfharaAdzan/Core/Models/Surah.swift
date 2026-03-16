@@ -5,6 +5,7 @@ struct Surah: Codable, Identifiable, Equatable {
     let name: String
     let arabicName: String
     let englishName: String
+    let indonesianName: String
     let ayahCount: Int
     let revelationType: String
     let ayahs: [Ayah]

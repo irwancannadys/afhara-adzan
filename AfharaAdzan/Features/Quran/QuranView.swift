@@ -2,12 +2,15 @@ import SwiftUI
 
 struct QuranView: View {
 
+    @Environment(AppState.self) private var appState
     @State private var selectedSurahId: Int?
     @State private var searchText = ""
 
     private let quranService = QuranService.shared
 
     var body: some View {
+        @Bindable var appState = appState
+
         HStack(spacing: 0) {
             // Left: Surah list
             SurahListView(
@@ -23,14 +26,26 @@ struct QuranView: View {
             // Right: Ayah detail
             if let surahId = selectedSurahId,
                let surah = quranService.surah(byId: surahId) {
-                AyahDetailView(surah: surah)
-                    .id(surahId)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                AyahDetailView(
+                    surah: surah,
+                    arabicFontSize: $appState.settings.quranArabicFontSize
+                )
+                .id(surahId)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 emptyState
             }
         }
         .toolbarBackground(.visible, for: .windowToolbar)
+        .onAppear {
+            if let lastId = appState.settings.quranLastSurahId {
+                selectedSurahId = lastId
+            }
+        }
+        .onChange(of: selectedSurahId) { _, newValue in
+            appState.settings.quranLastSurahId = newValue
+            appState.saveSettings()
+        }
     }
 
     private var emptyState: some View {
