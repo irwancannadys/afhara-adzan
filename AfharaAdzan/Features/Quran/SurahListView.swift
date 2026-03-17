@@ -3,32 +3,94 @@ import SwiftUI
 struct SurahListView: View {
 
     @Environment(AppState.self) private var appState
+    @Environment(\.colorScheme) private var colorScheme
     let surahs: [Surah]
     @Binding var selectedSurahId: Int?
     @Binding var searchText: String
-    var showBookmarks: Bool = false
+    @Binding var showBookmarks: Bool
     var onSelectSurah: ((_ surahId: Int) -> Void)?
 
     private var filteredSurahs: [Surah] {
         QuranService.shared.search(query: searchText)
     }
 
+    private var bookmarkCount: Int {
+        appState.settings.quranBookmarks.count
+    }
+
     var body: some View {
-        List(filteredSurahs) { surah in
-            SurahRow(surah: surah, isSelected: selectedSurahId == surah.id && !showBookmarks, appLanguage: appState.settings.appLanguage)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    selectedSurahId = surah.id
-                    onSelectSurah?(surah.id)
+        VStack(spacing: 0) {
+            // Inline search field
+            HStack(spacing: 6) {
+                Image(systemName: "magnifyingglass")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField(String(localized: "Cari surah..."), text: $searchText)
+                    .textFieldStyle(.plain)
+                    .font(.subheadline)
+                if !searchText.isEmpty {
+                    Button {
+                        searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+            }
+            .padding(8)
+            .background(.bar)
+
+            // Bookmark entry point
+            if bookmarkCount > 0 {
+                Button {
+                    showBookmarks.toggle()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: showBookmarks ? "bookmark.fill" : "bookmark")
+                            .font(.caption)
+                            .foregroundStyle(Color.accent(for: colorScheme))
+                        Text(String(localized: "Ayat Tersimpan"))
+                            .font(.caption)
+                        Spacer()
+                        Text("\(bookmarkCount)")
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Capsule().fill(Color.accent(for: colorScheme)))
+                            .id("badge_\(bookmarkCount)")
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .bottom).combined(with: .opacity),
+                                removal: .move(edge: .top).combined(with: .opacity)
+                            ))
+                            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: bookmarkCount)
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+
+            Divider()
+
+            List(filteredSurahs) { surah in
+                SurahRow(surah: surah, isSelected: selectedSurahId == surah.id && !showBookmarks, appLanguage: appState.settings.appLanguage)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedSurahId = surah.id
+                        onSelectSurah?(surah.id)
+                    }
+                    .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+            }
+            .listStyle(.inset)
         }
-        .listStyle(.inset)
-        .searchable(
-            text: $searchText,
-            placement: .sidebar,
-            prompt: String(localized: "Cari surah...")
-        )
     }
 }
 

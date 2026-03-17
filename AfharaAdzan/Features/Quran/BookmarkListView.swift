@@ -7,15 +7,16 @@ struct BookmarkListView: View {
 
     var onSelectAyah: (_ surahId: Int, _ numberInSurah: Int) -> Void
 
-    private let quranService = QuranService.shared
+    @State private var cachedItems: [(surah: Surah, ayah: Ayah)] = []
 
-    private var bookmarkedAyahs: [(surah: Surah, ayah: Ayah)] {
-        appState.settings.quranBookmarks.compactMap { key in
+    private func reloadBookmarks() {
+        let service = QuranService.shared
+        cachedItems = appState.settings.quranBookmarks.compactMap { key in
             let parts = key.split(separator: "_")
             guard parts.count == 2,
                   let surahId = Int(parts[0]),
                   let numberInSurah = Int(parts[1]),
-                  let surah = quranService.surah(byId: surahId),
+                  let surah = service.surah(byId: surahId),
                   let ayah = surah.ayahs.first(where: { $0.numberInSurah == numberInSurah })
             else { return nil }
             return (surah: surah, ayah: ayah)
@@ -34,7 +35,7 @@ struct BookmarkListView: View {
                 Text(String(localized: "Ayat Tersimpan"))
                     .font(.title2)
                     .fontWeight(.semibold)
-                Text(String(localized: "\(appState.settings.quranBookmarks.count) ayat"))
+                Text(String(localized: "\(cachedItems.count) ayat"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -43,12 +44,12 @@ struct BookmarkListView: View {
 
             Divider()
 
-            if bookmarkedAyahs.isEmpty {
+            if cachedItems.isEmpty {
                 emptyState
             } else {
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        ForEach(bookmarkedAyahs, id: \.ayah.id) { item in
+                        ForEach(cachedItems, id: \.ayah.id) { item in
                             BookmarkRow(
                                 surah: item.surah,
                                 ayah: item.ayah,
@@ -59,7 +60,7 @@ struct BookmarkListView: View {
                                     withAnimation(.easeInOut(duration: 0.25)) {
                                         appState.settings.quranBookmarks.removeAll { $0 == key }
                                     }
-                                    appState.saveSettings()
+                                    appState.saveSettingsQuiet()
                                 }
                             )
                             .transition(.asymmetric(
@@ -72,6 +73,8 @@ struct BookmarkListView: View {
                 }
             }
         }
+        .onAppear { reloadBookmarks() }
+        .onChange(of: appState.settings.quranBookmarks) { _, _ in reloadBookmarks() }
     }
 
     private var emptyState: some View {

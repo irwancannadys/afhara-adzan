@@ -52,6 +52,9 @@ final class AppState {
     // Doa dismiss timer
     private var doaDismissTimer: Timer?
 
+    // Debounce timer untuk saveSettings
+    private var saveDebounceTimer: Timer?
+
     // MARK: - Init
 
     init() {
@@ -233,8 +236,16 @@ final class AppState {
         guard settings.useAutoLocation else { return }
         locationService.requestPermission()
 
+        var attempts = 0
+        let maxAttempts = 60  // 30 detik (60 × 0.5s)
+
         Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
             guard let self else { timer.invalidate(); return }
+            attempts += 1
+            if attempts >= maxAttempts {
+                timer.invalidate()
+                return
+            }
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 guard let loc = self.locationService.currentLocation,
@@ -261,6 +272,7 @@ final class AppState {
         locationService.fetchOnce()
     }
 
+
     // MARK: - Stop All
 
     func stopAll() {
@@ -276,7 +288,27 @@ final class AppState {
 
     // MARK: - Persistence
 
+    func saveSettingsQuiet() {
+        if let data = try? JSONEncoder().encode(settings) {
+            UserDefaults.standard.set(data, forKey: "prayer_settings")
+        }
+    }
+
+    func saveSettingsImmediately() {
+        saveDebounceTimer?.invalidate()
+        commitSaveSettings()
+    }
+
     func saveSettings() {
+        saveDebounceTimer?.invalidate()
+        saveDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.commitSaveSettings()
+            }
+        }
+    }
+
+    private func commitSaveSettings() {
         if let data = try? JSONEncoder().encode(settings) {
             UserDefaults.standard.set(data, forKey: "prayer_settings")
         }
