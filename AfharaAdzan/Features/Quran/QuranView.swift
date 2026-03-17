@@ -2,6 +2,8 @@ import SwiftUI
 
 struct QuranView: View {
 
+    var isActive: Bool = true
+
     @Environment(AppState.self) private var appState
     @Environment(\.colorScheme) private var colorScheme
     @State private var selectedSurahId: Int?
@@ -20,7 +22,7 @@ struct QuranView: View {
                 surahs: quranService.surahs,
                 selectedSurahId: $selectedSurahId,
                 searchText: $searchText,
-                showBookmarks: showBookmarks,
+                showBookmarks: $showBookmarks,
                 onSelectSurah: { _ in showBookmarks = false }
             )
             .frame(width: 280)
@@ -53,35 +55,6 @@ struct QuranView: View {
                 emptyState
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    showBookmarks.toggle()
-                } label: {
-                    ZStack(alignment: .topTrailing) {
-                        Image(systemName: showBookmarks ? "bookmark.fill" : "bookmark")
-                            .font(.body)
-                        if appState.settings.quranBookmarks.count > 0 {
-                            Text("\(appState.settings.quranBookmarks.count)")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(.white)
-                                .id("badge_\(appState.settings.quranBookmarks.count)")
-                                .transition(.asymmetric(
-                                    insertion: .move(edge: .bottom).combined(with: .opacity),
-                                    removal: .move(edge: .top).combined(with: .opacity)
-                                ))
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 1)
-                                .background(Capsule().fill(Color.accent(for: colorScheme)))
-                                .offset(x: 8, y: -6)
-                                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: appState.settings.quranBookmarks.count)
-                        }
-                    }
-                }
-                .help("Bookmark (\(appState.settings.quranBookmarks.count))")
-            }
-        }
-        .toolbarBackground(.visible, for: .windowToolbar)
         .onAppear {
             if let lastId = appState.settings.quranLastSurahId {
                 selectedSurahId = lastId
@@ -89,7 +62,7 @@ struct QuranView: View {
         }
         .onChange(of: selectedSurahId) { _, newValue in
             appState.settings.quranLastSurahId = newValue
-            appState.saveSettings()
+            appState.saveSettingsQuiet()
         }
     }
 
