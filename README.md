@@ -45,6 +45,17 @@ A minimal macOS menu bar app for Islamic prayer time reminders. Lives quietly in
 - **Timezone label** — prayer times shown with WIB / WITA / WIT label based on your location
 - **Launch at Login** — toggle to start automatically on macOS login
 
+### Al-Quran
+
+- **Surah browser** — browse all 114 surahs with Arabic text, Indonesian & English translations (fully offline)
+- **Bookmark ayat** — star/unstar any ayah, view all bookmarks with badge counter
+- **Navigate to ayah** — tap a bookmark to jump to the surah and scroll to the ayah with highlight animation
+- **Last read position** — automatically saves and restores your last selected surah
+- **Arabic font size** — adjustable slider (18–40pt), persisted across sessions
+- **Bismillah separator** — shown at the top of each surah (except Al-Fatihah & At-Tawba)
+- **Copy verse** — copy any ayah with one click, visual feedback on copy
+- **Localized surah meanings** — Indonesian/English based on app language
+
 ---
 
 ## Installation
@@ -114,16 +125,18 @@ AfharaAdzanApp
 └── WindowGroup           ← desktop window
     └── MainWindowView    ← NavigationSplitView
         ├── ScheduleDetailView
+        ├── QuranView     ← surah list + ayah detail
         └── SettingsView
 
 Core/
 ├── AppState              ← single source of truth (@Observable)
-├── Models/               ← PrayerTime, LocationModel, PrayerSettings
+├── Models/               ← PrayerTime, LocationModel, PrayerSettings, Surah, Ayah
 └── Services/
     ├── PrayerTimeCalculator  ← multi-method algorithm (pure struct)
     ├── LocationService       ← CoreLocation wrapper
     ├── NotificationService   ← UNUserNotificationCenter
-    └── AudioService          ← AVFoundation
+    ├── AudioService          ← AVFoundation
+    └── QuranService          ← offline JSON loader + search
 ```
 
 `AppState` runs two timers: a 60-second timer to recalculate prayer times and a 1-second timer to update the countdown string. Prayer audio is scheduled via dedicated `Timer` instances, separate from notifications. Schedule auto-refreshes at midnight without requiring an app restart.
