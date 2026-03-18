@@ -2,18 +2,15 @@ import SwiftUI
 
 struct SettingsView: View {
 
+    var isActive: Bool = true
+
     @Environment(AppState.self) private var appState
     @State private var settings: PrayerSettings = PrayerSettings()
     @State private var manualCity: String = ""
     @State private var showRestartAlert: Bool = false
     @State private var showMadhabAlert: Bool = false
     @State private var didAppear: Bool = false
-
-    private var availableSounds: [String] {
-        Bundle.main.paths(forResourcesOfType: "mp3", inDirectory: nil)
-            .map { URL(fileURLWithPath: $0).deletingPathExtension().lastPathComponent }
-            .sorted()
-    }
+    @State private var availableSounds: [String] = []
 
     private var fardhuPrayerNames: [PrayerName] {
         PrayerName.allCases.filter { $0.isFardhu }
@@ -173,13 +170,14 @@ struct SettingsView: View {
             }
             .alert(String(localized: "Restart Aplikasi"), isPresented: $showRestartAlert) {
                 Button(String(localized: "Restart Sekarang")) {
-                    // Save settings dulu, lalu restart
+                    // Save langsung tanpa debounce — app akan terminate setelah ini
                     appState.settings = settings
-                    appState.saveSettings()
+                    appState.saveSettingsImmediately()
+                    let bundlePath = Bundle.main.bundlePath
                     let task = Process()
-                    task.launchPath = "/usr/bin/open"
-                    task.arguments = ["-n", Bundle.main.bundlePath]
-                    task.launch()
+                    task.launchPath = "/bin/sh"
+                    task.arguments = ["-c", "sleep 1 && open \"\(bundlePath)\""]
+                    try? task.run()
                     NSApplication.shared.terminate(nil)
                 }
                 Button(String(localized: "Nanti"), role: .cancel) { }
@@ -228,13 +226,25 @@ struct SettingsView: View {
 
         }
         .formStyle(.grouped)
-        .navigationTitle(String(localized: "Pengaturan"))
         .onAppear {
             settings   = appState.settings
+            manualCity = appState.location.cityName
+            if availableSounds.isEmpty {
+                availableSounds = Bundle.main.paths(forResourcesOfType: "mp3", inDirectory: nil)
+                    .map { URL(fileURLWithPath: $0).deletingPathExtension().lastPathComponent }
+                    .sorted()
+            }
+            DispatchQueue.main.async { didAppear = true }
+        }
+        .onChange(of: isActive) { _, active in
+            guard active, didAppear else { return }
+            didAppear = false
+            settings = appState.settings
             manualCity = appState.location.cityName
             DispatchQueue.main.async { didAppear = true }
         }
         .onChange(of: settings) { _, newVal in
+            guard didAppear else { return }
             appState.settings = newVal
             appState.saveSettings()
         }

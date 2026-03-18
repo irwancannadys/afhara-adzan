@@ -2,6 +2,7 @@ import SwiftUI
 
 enum MainNavItem: String, CaseIterable, Identifiable {
     case schedule = "Jadwal Sholat"
+    case quran    = "Al-Quran"
     case settings = "Pengaturan"
     case about    = "Tentang"
 
@@ -10,6 +11,7 @@ enum MainNavItem: String, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .schedule: "clock.fill"
+        case .quran:    "book.fill"
         case .settings: "gearshape.fill"
         case .about:    "info.circle.fill"
         }
@@ -18,6 +20,7 @@ enum MainNavItem: String, CaseIterable, Identifiable {
     var localizedName: String {
         switch self {
         case .schedule: String(localized: "Jadwal Sholat")
+        case .quran:    String(localized: "Al-Quran")
         case .settings: String(localized: "Pengaturan")
         case .about:    String(localized: "Tentang")
         }
@@ -68,12 +71,19 @@ struct MainWindowView: View {
             Divider()
 
             // Nav items
-            List(MainNavItem.allCases, selection: $selection) { item in
-                Label(item.localizedName, systemImage: item.icon)
-                    .tag(item)
+            VStack(spacing: 4) {
+                ForEach(MainNavItem.allCases) { item in
+                    SidebarNavRow(
+                        item: item,
+                        isSelected: selection == item,
+                        colorScheme: colorScheme
+                    ) {
+                        selection = item
+                    }
+                }
             }
-            .listStyle(.sidebar)
-            .padding(.top, 8)
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
 
             Spacer(minLength: 0)
 
@@ -81,6 +91,7 @@ struct MainWindowView: View {
 
             // Keluar
             Button(role: .destructive) {
+                appState.saveSettingsImmediately()
                 NSApplication.shared.terminate(nil)
             } label: {
                 Label(String(localized: "Keluar"), systemImage: "power")
@@ -96,13 +107,25 @@ struct MainWindowView: View {
 
     // MARK: - Detail
 
-    @ViewBuilder
     private var detailView: some View {
-        switch selection {
-        case .schedule: ScheduleDetailView()
-        case .settings: SettingsView()
-        case .about:    AboutView()
+        ZStack {
+            ScheduleDetailView()
+                .opacity(selection == .schedule ? 1 : 0)
+                .allowsHitTesting(selection == .schedule)
+
+            QuranView(isActive: selection == .quran)
+                .opacity(selection == .quran ? 1 : 0)
+                .allowsHitTesting(selection == .quran)
+
+            SettingsView(isActive: selection == .settings)
+                .opacity(selection == .settings ? 1 : 0)
+                .allowsHitTesting(selection == .settings)
+
+            AboutView()
+                .opacity(selection == .about ? 1 : 0)
+                .allowsHitTesting(selection == .about)
         }
+        .navigationTitle(selection.localizedName)
     }
 }
 
@@ -112,6 +135,18 @@ private struct ScheduleDetailView: View {
 
     @Environment(AppState.self) private var appState
     @Environment(\.colorScheme) private var colorScheme
+
+    @State private var islamicDate: String = ""
+    @State private var gregorianDate: String = ""
+    @State private var cachedDay: Int = 0
+
+    private func refreshDateStrings() {
+        let today = Calendar.current.component(.day, from: Date())
+        guard today != cachedDay else { return }
+        cachedDay = today
+        islamicDate = IslamicCalendarHelper.islamicDateString()
+        gregorianDate = Date().formatted(.dateTime.weekday(.wide).day().month(.wide).year())
+    }
 
     private var fardhuPrayers: [PrayerTime] {
         appState.prayerTimes.filter {
@@ -128,7 +163,7 @@ private struct ScheduleDetailView: View {
                     Text(String(localized: "Tanggal Hijriah"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(IslamicCalendarHelper.islamicDateString())
+                    Text(islamicDate)
                         .font(.title3)
                         .fontWeight(.semibold)
                 }
@@ -139,7 +174,7 @@ private struct ScheduleDetailView: View {
                     Text(String(localized: "Tanggal Masehi"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide).year()))
+                    Text(gregorianDate)
                         .font(.title3)
                         .fontWeight(.semibold)
                 }
@@ -201,6 +236,8 @@ private struct ScheduleDetailView: View {
             .listStyle(.plain)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear { refreshDateStrings() }
+        .onChange(of: appState.prayerTimes) { refreshDateStrings() }
     }
 }
 
@@ -371,6 +408,30 @@ private struct AboutView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle(String(localized: "Tentang"))
+        // navigationTitle handled by parent ZStack
+    }
+}
+
+// MARK: - Sidebar Nav Row
+
+private struct SidebarNavRow: View {
+
+    let item: MainNavItem
+    let isSelected: Bool
+    let colorScheme: ColorScheme
+    let action: () -> Void
+
+    var body: some View {
+        Label(item.localizedName, systemImage: item.icon)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 8)
+            .foregroundStyle(isSelected ? .white : Color.primary.opacity(0.85))
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(isSelected ? Color.accent(for: colorScheme) : .clear)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 6))
+            .onTapGesture(perform: action)
     }
 }

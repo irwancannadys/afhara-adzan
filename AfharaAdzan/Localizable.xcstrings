@@ -23,12 +23,35 @@
         }
       }
     },
+    "(%@)" : {
+
+    },
     "%@  %@" : {
       "localizations" : {
         "id" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@  %2$@"
+          }
+        }
+      }
+    },
+    "%@ — %lld %@ — %@" : {
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ — %2$lld %3$@ — %4$@"
+          }
+        }
+      }
+    },
+    "%@ : %lld" : {
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ : %2$lld"
           }
         }
       }
@@ -43,10 +66,13 @@
         }
       }
     },
-    "Afhara Adzan" : {
+    "%lld" : {
 
     },
-    "Akan memainkan adzan, lalu trigger doa banner + iqamah countdown setelah selesai." : {
+    "%lld ayat" : {
+
+    },
+    "Afhara Adzan" : {
 
     },
     "Aktifkan Iqamah Timer" : {
@@ -92,6 +118,9 @@
           }
         }
       }
+    },
+    "Al-Quran" : {
+
     },
     "Allāhumma Rabba hāżihid da'watit tāmmah, waṣ-ṣalātil qā'imah, āti Muḥammadanil wasīlata wal faḍīlah, wab'aṡhu maqāman maḥmūdanil lażī wa'adtah." : {
 
@@ -184,6 +213,31 @@
         }
       }
     },
+    "Ayat" : {
+
+    },
+    "Ayat Tersimpan" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الآيات المحفوظة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved Verses"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayat Tersimpan"
+          }
+        }
+      }
+    },
     "Bahasa" : {
       "localizations" : {
         "ar" : {
@@ -250,6 +304,28 @@
         }
       }
     },
+    "Belum ada ayat tersimpan" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد آيات محفوظة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No saved verses yet"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belum ada ayat tersimpan"
+          }
+        }
+      }
+    },
     "Berikutnya" : {
       "localizations" : {
         "ar" : {
@@ -268,6 +344,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Berikutnya"
+          }
+        }
+      }
+    },
+    "Bookmark ayat" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حفظ الآية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bookmark verse"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bookmark ayat"
           }
         }
       }
@@ -312,6 +410,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buka saat Login"
+          }
+        }
+      }
+    },
+    "Cari surah..." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابحث عن سورة..."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search surah..."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cari surah..."
           }
         }
       }
@@ -513,6 +633,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gelap"
+          }
+        }
+      }
+    },
+    "Hapus bookmark" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة الإشارة المرجعية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove bookmark"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hapus bookmark"
           }
         }
       }
@@ -739,6 +881,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kemenag RI"
+          }
+        }
+      }
+    },
+    "Ketuk bintang pada ayat untuk menyimpan" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغط على النجمة لحفظ الآية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the star on a verse to save it"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ketuk bintang pada ayat untuk menyimpan"
           }
         }
       }
@@ -1233,6 +1397,28 @@
         }
       }
     },
+    "Pilih surah untuk membaca" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختر سورة للقراءة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select a surah to read"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih surah untuk membaca"
+          }
+        }
+      }
+    },
     "Preview" : {
 
     },
@@ -1438,6 +1624,28 @@
         }
       }
     },
+    "Salin ayat" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسخ الآية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy verse"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salin ayat"
+          }
+        }
+      }
+    },
     "Simpan" : {
       "localizations" : {
         "ar" : {
@@ -1459,9 +1667,6 @@
           }
         }
       }
-    },
-    "Simulasi Adzan Sekarang" : {
-
     },
     "Sistem" : {
       "localizations" : {
@@ -1840,9 +2045,6 @@
         }
       }
     },
-    "Test Adzan" : {
-
-    },
     "Umm al-Qura" : {
       "localizations" : {
         "ar" : {
@@ -1958,6 +2160,9 @@
 
     },
     "اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ" : {
+
+    },
+    "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" : {
 
     }
   },
