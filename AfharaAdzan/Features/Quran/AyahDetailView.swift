@@ -64,7 +64,7 @@ struct AyahDetailView: View {
                         if showBismillah {
                             Text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")
                                 .font(.system(size: 20))
-                                .foregroundStyle(.black.opacity(0.85))
+                                .foregroundStyle(.primary)
                                 .frame(maxWidth: .infinity)
                         }
                         ForEach(surah.ayahs) { ayah in
