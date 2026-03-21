@@ -7,7 +7,7 @@ All notable changes to Afhara Adzan are documented here.
 ## [1.6.0]
 
 ### Added
-- **Random doa setelah adzan** — 6 koleksi doa (HR. Bukhari, HR. Abu Dawud, QS. Al-Baqarah: 201, HR. Ibnu Majah, Sayyidul Istighfar, HR. Muslim) di-shuffle harian dan ditampilkan 1 doa berbeda setiap waktu sholat fardhu
+- **Random dua after adzan** — 6 curated duas (HR. Bukhari, HR. Abu Dawud, QS. Al-Baqarah: 201, HR. Ibnu Majah, Sayyidul Istighfar, HR. Muslim) shuffled daily and displayed one unique dua per fardhu prayer
 
 ---
 
