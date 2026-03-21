@@ -32,6 +32,7 @@ final class AppState {
 
     // Doa setelah adzan
     var showDoaBanner  : Bool = false
+    var currentDuas    : [Dua] = []
 
     // Iqamah
     var iqamahState    : IqamahState = .idle
@@ -51,6 +52,10 @@ final class AppState {
 
     // Doa dismiss timer
     private var doaDismissTimer: Timer?
+
+    // Doa harian
+    private var dailyDuaQueue: [Dua] = []
+    private var dailyDuaDate: Int = 0
 
     // Debounce timer untuk saveSettings
     private var saveDebounceTimer: Timer?
@@ -137,6 +142,7 @@ final class AppState {
         // Doa setelah adzan — tampil selama (iqamah duration - 10 detik)
         // dismissDoaBanner() di updateIqamahCountdown akan dismiss saat iqamah selesai
         if settings.showDuaAfterAdzan {
+            pickDuasForCurrentPrayer()
             showDoaBanner = true
             doaDismissTimer?.invalidate()
             let doaDuration = max(Double(settings.iqamahDurationMinutes) * 60 - 10, 5)
@@ -150,6 +156,21 @@ final class AppState {
         // Iqamah countdown
         if settings.iqamahEnabled {
             startIqamahCountdown(for: prayerName)
+        }
+    }
+
+    private func pickDuasForCurrentPrayer() {
+        let today = Calendar.current.component(.day, from: Date())
+        if today != dailyDuaDate {
+            dailyDuaDate = today
+            dailyDuaQueue = Dua.all.shuffled()
+        }
+
+        if !dailyDuaQueue.isEmpty {
+            currentDuas = [dailyDuaQueue.removeFirst()]
+        } else {
+            // Fallback: kalau queue habis, tampilkan doa pertama (doa setelah adzan)
+            currentDuas = [Dua.all[0]]
         }
     }
 

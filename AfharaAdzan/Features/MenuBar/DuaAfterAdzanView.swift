@@ -23,24 +23,34 @@ struct DuaAfterAdzanView: View {
                 .buttonStyle(.plain)
             }
 
-            Text("اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ")
-                .font(.system(size: 13))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .environment(\.layoutDirection, .rightToLeft)
+            ForEach(Array(appState.currentDuas.enumerated()), id: \.offset) { _, dua in
+                VStack(spacing: 6) {
+                    Text(dua.title)
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.accent(for: colorScheme))
 
-            Text("Allāhumma Rabba hāżihid da'watit tāmmah, waṣ-ṣalātil qā'imah, āti Muḥammadanil wasīlata wal faḍīlah, wab'aṡhu maqāman maḥmūdanil lażī wa'adtah.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+                    Text(dua.arabic)
+                        .font(.system(size: 13))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .environment(\.layoutDirection, .rightToLeft)
 
-            Text(String(localized: "\"Ya Allah, Tuhan pemilik seruan yang sempurna ini dan sholat yang akan ditegakkan, karuniakanlah kepada Muhammad wasilah dan keutamaan, dan bangkitkanlah beliau ke tempat terpuji yang telah Engkau janjikan.\""))
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .italic()
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+                    Text(dua.transliteration)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text(dua.translation)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .italic()
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+            }
         }
         .padding(12)
         .background(Color.accentBackground(for: colorScheme))
